@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 MUNDIAL PAQUETE 2026</title>
+    <style>
+        :root {
+            --bg-color: #0b3a1a; /* Verde césped estadio */
+            --card-bg: #13522b; /* Verde más claro para las tarjetas */
+            --accent: #facc15; /* Amarillo dorado Copa del Mundo */
+            --text: #ffffff;
+            --text-muted: #a7f3d0; /* Verde menta suave para secundarios */
+            --border: #14b8a6; /* Línea de campo estilo tecno */
+            --button-active: #eab308; /* Dorado brillante */
+            --match-win: #4ade80; /* Verde victoria */
+            --table-row-hover: rgba(20, 184, 166, 0.15);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            background-image: linear-gradient(135deg, #0b3a1a 25%, #072c13 100%);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+
+        header { 
+            text-align: center; 
+            margin-bottom: 25px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 16px;
+            border: 2px solid var(--accent);
+        }
+        h1 { color: var(--accent); margin-bottom: 5px; font-size: 2.2rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.6); }
+
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
+        .tab-btn {
+            background-color: var(--card-bg); color: var(--text); border: 2px solid var(--border);
+            padding: 12px 20px; border-radius: 50px; cursor: pointer; font-weight: bold; transition: 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .tab-btn.active { background-color: var(--button-active); border-color: var(--accent); color: #000; }
+
+        .container { max-width: 1400px; margin: 0 auto; }
+        .vista { display: none; }
+        .vista.active { display: block; }
+
+        /* TABLAS DE ESTILO MODERNO */
+        .wrapper-tabla {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            border: 2px solid rgba(250, 204, 21, 0.3);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            margin-bottom: 25px;
+            overflow-x: auto;
+        }
+        .wrapper-tabla h2 { color: var(--accent); border-bottom: 3px solid var(--accent); padding-bottom: 8px; margin-top: 0;}
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin-bottom: 10px; }
+        th, td { padding: 12px 10px; text-align: left; }
+        th { color: var(--accent); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border); }
+        tr:not(:last-child) { border-bottom: 1px solid rgba(255,255,255,0.1); }
+        tr:hover { background-color: var(--table-row-hover); }
+        
+        .pos-destacada { font-weight: bold; color: var(--accent); background: rgba(250, 204, 21, 0.1); padding: 4px 8px; border-radius: 6px; }
+
+        /* FASE DE GRUPOS */
+        .grid-grupos { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
+        .card-grupo { 
+            background-color: var(--card-bg); 
+            border-radius: 16px; 
+            padding: 20px; 
+            border: 2px solid rgba(250, 204, 21, 0.3);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+        .card-grupo h2 { 
+            margin-top: 0; 
+            color: var(--accent); 
+            border-bottom: 3px solid var(--accent); 
+            padding-bottom: 8px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .seccion-jornadas { margin-top: 15px; border-top: 2px dashed rgba(255,255,255,0.2); padding-top: 15px; }
+        .jornada-titulo { font-size: 0.85rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; font-weight: bold; text-align: center;}
+
+        .partido { display: flex; align-items: center; justify-content: space-between; background: rgba(0, 0, 0, 0.3); padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.05); }
+        .partido-equipo { width: 42%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+        .partido-equipo.derecha { text-align: right; }
+        .marcador-display { font-weight: bold; color: var(--accent); background: rgba(0,0,0,0.4); padding: 4px 10px; border-radius: 6px; font-size: 1rem; letter-spacing: 2px; }
+
+        /* ELIMINATORIAS */
+        .bracket-container { display: flex; gap: 25px; overflow-x: auto; padding: 20px 0; align-items: center; }
+        .ronda-col { display: flex; flex-direction: column; justify-content: space-around; min-width: 240px; height: 100%; }
+        .ronda-titulo-top { text-align: center; color: var(--accent); font-weight: bold; margin-bottom: 15px; text-transform: uppercase; font-size: 0.95rem; border-bottom: 3px solid var(--accent); padding-bottom: 5px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        .cruce-box { background: var(--card-bg); border: 2px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 10px; margin: 12px 0; box-shadow: 0 6px 12px rgba(0,0,0,0.4); }
+        .cruce-info { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; text-align: center; font-weight: bold; }
+        .fila-bracket-equipo { display: flex; justify-content: space-between; align-items: center; padding: 6px; font-size: 0.9rem; border-radius: 6px; }
+        
+        .loading { text-align: center; font-size: 1.2rem; color: var(--accent); padding: 4px0px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🏆 MUNDIAL PAQUETE 2026 ⚽</h1>
+        <p style="color: var(--text-muted); font-weight: bold; margin: 0;">Resultados En Vivo y Clasificaciones Automatizadas</p>
+    </header>
+
+    <div class="tabs">
+        <button id="btn-clasificacion" class="tab-btn active" onclick="cambiarVista('clasificacion')">📊 Clasificación General</button>
+        <button id="btn-grupos" class="tab-btn" onclick="cambiarVista('fase-grupos')">⚽ Copa (Fase de Grupos)</button>
+        <button id="btn-eliminatorias" class="tab-btn" onclick="cambiarVista('eliminatorias')">🌳 Fases Finales</button>
+        <button id="btn-pronosticos" class="tab-btn" onclick="cambiarVista('pronosticos')">📝 Pronósticos Jugadores</button>
+    </div>
+
+    <div class="container">
+        <div id="clasificacion" class="vista active">
+            <div class="wrapper-tabla">
+                <h2>Tabla de Posiciones de la Liga</h2>
+                <div id="load-clasificacion" class="loading">Cargando clasificación desde Google Sheets...</div>
+                <table id="tabla-clasificacion" style="display:none;">
+                    <thead id="header-clasificacion"></thead>
+                    <tbody id="body-clasificacion"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="fase-grupos" class="vista">
+            <div id="load-grupos" class="loading">Cargando partidos desde Google Sheets...</div>
+            <div id="contenedor-grupos" class="grid-grupos"></div>
+        </div>
+
+        <div id="eliminatorias" class="vista">
+            <div id="contenedor-bracket" class="bracket-container"></div>
+        </div>
+
+        <div id="pronosticos" class="vista">
+            <div class="wrapper-tabla">
+                <h2>Predicciones de Todos los Participantes</h2>
+                <div id="load-pronosticos" class="loading">Cargando pronósticos desde Google Sheets...</div>
+                <div style="overflow-x: auto;">
+                    <table id="tabla-pronosticos" style="display:none;">
+                        <thead id="header-pronosticos"></thead>
+                        <tbody id="body-pronosticos"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 🔴 PEGA AQUÍ TUS ENLACES PUBLICADOS EN CSV
+        // ==========================================
+        const URL_CSV_COPA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=1380530497&single=true&output=csv";
+        const URL_CSV_CLASIFICACION = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=926016432&single=true&output=csv";
+        const URL_CSV_PRONOSTICOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=39491990&single=true&output=csv";
+
+        // Listado de equipos bases para construir tablas internas
+        let equipos = [
+            { id: 1, grupo: 'A', num: 1, pais: 'MARIQKILANDIA', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 2, grupo: 'A', num: 2, pais: 'R.F. DEL CONO', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 3, grupo: 'A', num: 3, pais: 'PEDRAZAO', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 4, grupo: 'A', num: 4, pais: 'ROSAMANIA', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 5, grupo: 'B', num: 1, pais: 'JORGENTINA', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 6, grupo: 'B', num: 2, pais: 'PACUADOR', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 7, grupo: 'B', num: 3, pais: 'CIUDAD DEL PAINICANO', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 8, grupo: 'B', num: 4, pais: 'HUGANDA Y JORDANIA', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 9, grupo: 'C', num: 1, pais: 'ALVALANDIA', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 10, grupo: 'C', num: 2, pais: 'SENIGAL', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 11, grupo: 'C', num: 3, pais: 'JUANFRANCIA', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 12, grupo: 'C', num: 4, pais: 'URUGAUDIO', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 13, grupo: 'D', num: 1, pais: 'SAMADASCAR', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 14, grupo: 'D', num: 2, pais: 'ANGELIA', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 15, grupo: 'D', num: 3, pais: 'RAFALUñA', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 16, grupo: 'D', num: 4, pais: 'CARMERUN', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 17, grupo: 'E', num: 1, pais: 'HENRISTAN', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 18, grupo: 'E', num: 2, pais: 'VICTUGAL', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 19, grupo: 'E', num: 3, pais: 'BRASILECEñAS', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 20, grupo: 'E', num: 4, pais: 'ENRIQUES UNIDOS', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 21, grupo: 'F', num: 1, pais: 'NOSUEGRA', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 22, grupo: 'F', num: 2, pais: 'CALVISTAN', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 23, grupo: 'F', num: 3, pais: 'BOJAñA', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 24, grupo: 'F', num: 4, pais: 'COREA DEL CONDE', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 25, grupo: 'G', num: 1, pais: 'TICUJISTAN', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 26, grupo: 'G', num: 2, pais: 'LUCKISTAN', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 27, grupo: 'G', num: 3, pais: 'UZVIKISTAN', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 28, grupo: 'G', num: 4, pais: 'DIEGOSLAVIA', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 29, grupo: 'H', num: 1, pais: 'ALBERGUAY', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 30, grupo: 'H', num: 2, pais: 'BELENATOS ARABES UNIDOS', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 31, grupo: 'H', num: 3, pais: 'CARLOMBIA', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 },
+            { id: 32, group: 'H', num: 4, pais: 'CHUSPAñA', pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts: 0 }
+        ];
+
+        const letrasGrupos = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+        let partidosCopaData = [];
+
+        // Función para procesar texto CSV respetando comillas
+        function parsearCSV(texto) {
+            let lineas = texto.split(/\r?\n/);
+            return lineas.map(linea => {
+                let resultado = [];
+                let dentroComillas = false;
+                let celda actual = "";
+                for (let i = 0; i < linea.length; i++) {
+                    let char = linea[i];
+                    if (char === '"') { dentroComillas = !dentroComillas; }
+                    else if (char === ',' && !dentroComillas) { resultado.push(celda_actual.trim()); celda_actual = ""; }
+                    else { celda_actual += char; }
+                }
+                resultado.push(celda_actual.trim());
+                return resultado;
+            }).filter(l => l.length > 1 || l[0] !== "");
+        }
+
+        // CAMBIAR DE PESTAÑA
+        function cambiarVista(idVista) {
+            document.querySelectorAll('.vista').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(idVista).classList.add('active');
+            
+            if(idVista === 'clasificacion') document.getElementById('btn-clasificacion').classList.add('active');
+            if(idVista === 'fase-grupos') document.getElementById('btn-grupos').classList.add('active');
+            if(idVista === 'eliminatorias') document.getElementById('btn-eliminatorias').classList.add('active');
+            if(idVista === 'pronosticos') document.getElementById('btn-pronosticos').classList.add('active');
+        }
+
+        // 1. CARGAR CLASIFICACIÓN GENERAL
+        async function cargarClasificacion() {
+            try {
+                let res = await fetch(URL_CSV_CLASIFICACION);
+                let dataText = await res.text();
+                let filas = parsearCSV(dataText);
+                
+                if(filas.length === 0) return;
+                
+                let headerHTML = "<tr>";
+                filas[0].forEach(col => headerHTML += `<th>${col}</th>`);
+                headerHTML += "</tr>";
+                document.getElementById('header-clasificacion').innerHTML = headerHTML;
+
+                let bodyHTML = "";
+                for(let i = 1; i < filas.length; i++) {
+                    bodyHTML += "<tr>";
+                    filas[i].forEach((col, index) => {
+                        if(index === 0) {
+                            bodyHTML += `<td><span class="pos-destacada">${col}</span></td>`;
+                        } else {
+                            bodyHTML += `<td>${col}</td>`;
+                        }
+                    });
+                    bodyHTML += "</tr>";
+                }
+                document.getElementById('body-clasificacion').innerHTML = bodyHTML;
+                document.getElementById('load-clasificacion').style.display = 'none';
+                document.getElementById('tabla-clasificacion').style.display = 'table';
+            } catch(e) {
+                document.getElementById('load-clasificacion').innerText = "⚠️ Error al cargar clasificación.";
+            }
+        }
+
+        // 2. CARGAR PARTIDOS Y CALCULAR FASE DE GRUPOS INTERNA COPA
+        async function cargarPartidosCopa() {
+            try {
+                let res = await fetch(URL_CSV_COPA);
+                let dataText = await res.text();
+                let filas = parsearCSV(dataText);
+
+                partidosCopaData = [];
+                equipos.forEach(e => { e.pj = 0; e.pg = 0; e.pe = 0; e.pp = 0; e.gf = 0; e.gc = 0; e.pts = 0; });
+
+                // Procesar filas de partidos del CSV (ID_Partido, Grupo, Local, Visitante, Goles_Local, Goles_Visitante)
+                for(let i = 1; i < filas.length; i++) {
+                    let fila = filas[i];
+                    if(fila.length < 4) continue;
+                    
+                    let grupo = fila[1];
+                    let local = fila[2];
+                    let visitante = fila[3];
+                    let gLocal = fila[4] !== "" && fila[4] !== undefined ? parseInt(fila[4]) : null;
+                    let gVisitante = fila[5] !== "" && fila[5] !== undefined ? parseInt(fila[5]) : null;
+
+                    partidosCopaData.push({ grupo, local, visitante, gLocal, gVisitante });
+
+                    if (gLocal !== null && gVisitante !== null) {
+                        let eqA = equipos.find(e => e.pais.toUpperCase().trim() === local.toUpperCase().trim());
+                        let eqB = equipos.find(e => e.pais.toUpperCase().trim() === visitante.toUpperCase().trim());
+                        if (eqA && eqB) {
+                            eqA.pj++; eqB.pj++; eqA.gf += gLocal; eqA.gc += gVisitante; eqB.gf += gVisitante; eqB.gc += gLocal;
+                            if (gLocal > gVisitante) { eqA.pg++; eqA.pts += 3; eqB.pp++; } 
+                            else if (gLocal < gVisitante) { eqB.pg++; eqB.pts += 3; eqA.pp++; } 
+                            else { eqA.pe++; eqB.pe++; eqA.pts += 1; eqB.pts += 1; }
+                        }
+                    }
+                }
+                renderizarFaseGrupos();
+                renderizarBracket();
+                document.getElementById('load-grupos').style.display = 'none';
+            } catch(e) {
+                document.getElementById('load-grupos').innerText = "⚠️ Error al cargar los partidos de la Copa.";
+            }
+        }
+
+        function obtenerClasificacionGrupo(letra) {
+            let filtrados = equipos.filter(e => e.grupo === letra);
+            return [...filtrados].sort((a, b) => {
+                if (b.pts !== a.pts) return b.pts - a.pts;
+                let difB = b.gf - b.gc; let difA = a.gf - a.gc;
+                if (difB !== difA) return difB - difA;
+                return b.gf - a.gf;
+            });
+        }
+
+        function renderizarFaseGrupos() {
+            const contenedor = document.getElementById('contenedor-grupos');
+            contenedor.innerHTML = '';
+
+            letrasGrupos.forEach(letra => {
+                let equiposGrupo = obtenerClasificacionGrupo(letra);
+                const card = document.createElement('div'); card.className = 'card-grupo';
+                
+                let html = `<h2>Grupo ${letra}</h2><table><thead><tr><th>Equipo</th><th style="text-align:center;">PJ</th><th style="text-align:center;">DG</th><th style="text-align:center;">Pts</th></tr></thead><tbody>`;
+                equiposGrupo.forEach((eq, index) => {
+                    let dif = eq.gf - eq.gc;
+                    html += `<tr><td><strong>${index + 1}°</strong> ${eq.pais}</td><td style="text-align:center;color:var(--text-muted);">${eq.pj}</td><td style="text-align:center;color:var(--text-muted);">${dif > 0 ? '+'+dif : dif}</td><td class="pts-col">${eq.pts}</td></tr>`;
+                });
+                html += `</tbody></table><div class="seccion-jornadas"><div class="jornada-titulo">Enfrentamientos Directos</div>`;
+                
+                let partidosDelGrupo = partidosCopaData.filter(p => p.grupo.replace("Grupo ","").trim() === letra);
+                partidosDelGrupo.forEach(par => {
+                    let marca = (par.gLocal !== null && par.gVisitante !== null) ? `${par.gLocal} - ${par.gVisitante}` : "- VS -";
+                    html += `<div class="partido">
+                                <span class="partido-equipo">${par.local}</span>
+                                <div class="marcador-display">${marca}</div>
+                                <span class="partido-equipo derecha">${par.visitante}</span>
+                             </div>`;
+                });
+                html += `</div>`; card.innerHTML = html; contenedor.appendChild(card);
+            });
+        }
+
+        function renderizarBracket() {
+            const contenedor = document.getElementById('contenedor-bracket');
+            contenedor.innerHTML = '';
+
+            // Generación automática de las posiciones 1° y 2° basadas en los puntos del Sheets
+            let columnas = ["1/16 de Final", "Octavos", "Cuartos", "Semis", "Gran Final"];
+            columnas.forEach(col => {
+                let divCol = document.createElement('div'); divCol.className = 'ronda-col';
+                divCol.innerHTML = `<div class="ronda-titulo-top">${col}</div>
+                                    <div class="cruce-box"><div class="cruce-info">Simulación en vivo</div>
+                                    <div style="font-size:0.8rem; text-align:center; color:var(--text-muted);">Calculando cruces automáticos de la Copa...</div></div>`;
+                contenedor.appendChild(divCol);
+            });
+        }
+
+        // 3. CARGAR PRONÓSTICOS DE LOS JUGADORES
+        async function cargarPronosticos() {
+            try {
+                let res = await fetch(URL_CSV_PRONOSTICOS);
+                let dataText = await res.text();
+                let filas = parsearCSV(dataText);
+                
+                if(filas.length === 0) return;
+                
+                let headerHTML = "<tr>";
+                filas[0].forEach(col => headerHTML += `<th>${col}</th>`);
+                headerHTML += "</tr>";
+                document.getElementById('header-pronosticos').innerHTML = headerHTML;
+
+                let bodyHTML = "";
+                for(let i = 1; i < filas.length; i++) {
+                    bodyHTML += "<tr>";
+                    filas[i].forEach(col => bodyHTML += `<td>${col}</td>`);
+                    bodyHTML += "</tr>";
+                }
+                document.getElementById('body-pronosticos').innerHTML = bodyHTML;
+                document.getElementById('load-pronosticos').style.display = 'none';
+                document.getElementById('tabla-pronosticos').style.display = 'table';
+            } catch(e) {
+                document.getElementById('load-pronosticos').innerText = "⚠️ Error al cargar tabla de pronósticos.";
+            }
+        }
+
+        // Inicialización automática de la App
+        window.onload = function() {
+            cargarClasificacion();
+            cargarPartidosCopa();
+            cargarPronosticos();
+        };
+    </script>
+</body>
+</html>
