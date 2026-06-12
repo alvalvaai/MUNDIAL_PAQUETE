@@ -95,7 +95,7 @@
             font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 2px;
         }
 
-        /* TABLA DE PRONÓSTICOS REDISEÑADA */
+        /* TABLA DE PRONÓSTICOS CON BORDES CLAROS PARA MÓVIL */
         .tabla-porra { width: 100%; border-collapse: separate; border-spacing: 0; }
         .tabla-porra th {
             background-color: #072a13; color: var(--accent); font-size: 0.7rem; text-align: center; padding: 6px 4px; border-bottom: 2px solid var(--border);
@@ -242,7 +242,7 @@
 
                 for(let i = 1; i < filas.length; i++) {
                     let fila = filas[i];
-                    if(fila.length < 4) continue;
+                    if(!fila || fila.length < 4) continue;
 
                     let grupo = (fila[1] || "").trim();
                     let local = fila[2] || "Sin nombre";
@@ -328,8 +328,6 @@
                 });
 
                 document.getElementById('load-copa').style.display = 'none';
-                
-                // 🔥 CRÍTICO: Forzamos a dibujar los cruces con los nuevos datos calculados
                 generarCuadroCruces();
 
             } catch(e) { console.error(e); document.getElementById('load-copa').innerText = "⚠️ Error al conectar con la pestaña Copa."; }
@@ -337,14 +335,16 @@
 
         function generarCuadroCruces() {
             let posiciones = {};
-            Object.keys(gruposGlobalesMapeados).forEach(gName => {
-                let eqData = gruposGlobalesMapeados[gName].equipos;
-                let ordenados = Object.keys(eqData).map(name => { return { name, ...eqData[name] }; }).sort((a,b) => b.pts - a.pts || b.dg - a.dg);
-                posiciones[gName] = ordenados;
-            });
+            if(gruposGlobalesMapeados) {
+                Object.keys(gruposGlobalesMapeados).forEach(gName => {
+                    let eqData = gruposGlobalesMapeados[gName].equipos;
+                    let ordenados = Object.keys(eqData).map(name => { return { name, ...eqData[name] }; }).sort((a,b) => b.pts - a.pts || b.dg - a.dg);
+                    posiciones[gName] = ordenados;
+                });
+            }
 
             let getEqTeorico = (grupo, pos) => {
-                if (posiciones[grupo] && posiciones[grupo][pos - 1] && posiciones[grupo][pos - 1].name) {
+                if (posiciones && posiciones[grupo] && posiciones[grupo][pos - 1] && posiciones[grupo][pos - 1].name) {
                     return posiciones[grupo][pos - 1].name;
                 }
                 return `${pos}° ${grupo}`;
@@ -374,7 +374,7 @@
             // 1. COLUMNA 1/16 DE FINAL
             html += `<div class="ronda-columna"><div class="ronda-titulo-cruces">1/16 Final</div>`;
             for(let i = 0; i < 16; i++) {
-                let pExcel = partidosEliminatoriasMapeados["1/16 F"] ? partidosEliminatoriasMapeados["1/16 F"][i] : null;
+                let pExcel = (partidosEliminatoriasMapeados["1/16 F"] && partidosEliminatoriasMapeados["1/16 F"][i]) ? partidosEliminatoriasMapeados["1/16 F"][i] : null;
                 let local = pExcel ? pExcel.local : llavesProvisionales[i].l;
                 let visitante = pExcel ? pExcel.visitante : llavesProvisionales[i].v;
                 let marcador = (pExcel && pExcel.gLocal !== "" && pExcel.gLocal !== undefined) ? `${pExcel.gLocal} - ${pExcel.gVisitante}` : "-";
@@ -389,7 +389,7 @@
             // 2. COLUMNA OCTAVOS
             html += `<div class="ronda-columna"><div class="ronda-titulo-cruces">Octavos de Final</div>`;
             for(let i = 0; i < 8; i++) {
-                let pExcel = partidosEliminatoriasMapeados["1/8 F"] ? partidosEliminatoriasMapeados["1/8 F"][i] : null;
+                let pExcel = (partidosEliminatoriasMapeados["1/8 F"] && partidosEliminatoriasMapeados["1/8 F"][i]) ? partidosEliminatoriasMapeados["1/8 F"][i] : null;
                 let local = pExcel ? pExcel.local : "Por definir";
                 let visitante = pExcel ? pExcel.visitante : "Por definir";
                 let marcador = (pExcel && pExcel.gLocal !== "" && pExcel.gLocal !== undefined) ? `${pExcel.gLocal} - ${pExcel.gVisitante}` : "-";
@@ -408,7 +408,7 @@
             // 3. COLUMNA CUARTOS
             html += `<div class="ronda-columna"><div class="ronda-titulo-cruces">Cuartos de Final</div>`;
             for(let i = 0; i < 4; i++) {
-                let pExcel = partidosEliminatoriasMapeados["1/4 F"] ? partidosEliminatoriasMapeados["1/4 F"][i] : null;
+                let pExcel = (partidosEliminatoriasMapeados["1/4 F"] && partidosEliminatoriasMapeados["1/4 F"][i]) ? partidosEliminatoriasMapeados["1/4 F"][i] : null;
                 let local = pExcel ? pExcel.local : "Por definir";
                 let visitante = pExcel ? pExcel.visitante : "Por definir";
                 let marcador = (pExcel && pExcel.gLocal !== "" && pExcel.gLocal !== undefined) ? `${pExcel.gLocal} - ${pExcel.gVisitante}` : "-";
@@ -427,7 +427,7 @@
             // 4. COLUMNA SEMIFINALES
             html += `<div class="ronda-columna"><div class="ronda-titulo-cruces">Semifinales</div>`;
             for(let i = 0; i < 2; i++) {
-                let pExcel = partidosEliminatoriasMapeados["1/2 F"] ? partidosEliminatoriasMapeados["1/2 F"][i] : null;
+                let pExcel = (partidosEliminatoriasMapeados["1/2 F"] && partidosEliminatoriasMapeados["1/2 F"][i]) ? partidosEliminatoriasMapeados["1/2 F"][i] : null;
                 let local = pExcel ? pExcel.local : "Por definir";
                 let visitante = pExcel ? pExcel.visitante : "Por definir";
                 let marcador = (pExcel && pExcel.gLocal !== "" && pExcel.gLocal !== undefined) ? `${pExcel.gLocal} - ${pExcel.gVisitante}` : "-";
@@ -444,7 +444,7 @@
             html += `</div>`;
 
             // 5. COLUMNA GRAN FINAL
-            let pFinal = partidosEliminatoriasMapeados["FINAL"] ? partidosEliminatoriasMapeados["FINAL"][0] : null;
+            let pFinal = (partidosEliminatoriasMapeados["FINAL"] && partidosEliminatoriasMapeados["FINAL"][0]) ? partidosEliminatoriasMapeados["FINAL"][0] : null;
             let locF = pFinal ? pFinal.local : "Por definir finalistas";
             let visF = pFinal ? pFinal.visitante : "";
             let marF = (pFinal && pFinal.gLocal !== "" && pFinal.gLocal !== undefined) ? `${pFinal.gLocal} - ${pFinal.gVisitante}` : "-";
@@ -470,3 +470,37 @@
                 let res = await fetch(URL_CSV_PRONOSTICOS);
                 let text = await res.text();
                 let filas = parsearCSV(text);
+                if(filas.length === 0) return;
+
+                let headerHTML = "<tr>";
+                filas[0].forEach((col, idx) => {
+                    if(idx === 0) headerHTML += `<th class="jugador-header">${col}</th>`;
+                    else headerHTML += `<th>${col}</th>`;
+                });
+                headerHTML += "</tr>";
+                document.getElementById('header-pronosticos').innerHTML = headerHTML;
+
+                let bodyHTML = "";
+                for(let i = 1; i < filas.length; i++) {
+                    bodyHTML += "<tr>";
+                    filas[i].forEach((col, idx) => {
+                        if(idx === 0) bodyHTML += `<td class="jugador-celda">${col}</td>`;
+                        else if(idx === filas[i].length - 1 || filas[0][idx].toLowerCase() === 'total') bodyHTML += `<td class="celda-total">${col}</td>`;
+                        else { let val = col.trim(); bodyHTML += `<td class="celda-pronostico">${val === "" ? "-" : val}</td>`; }
+                    });
+                    bodyHTML += "</tr>";
+                }
+                document.getElementById('body-pronosticos').innerHTML = bodyHTML;
+                document.getElementById('load-pronosticos').style.display = 'none';
+                document.getElementById('tabla-pronosticos').style.display = 'table';
+            } catch(e) { console.error(e); document.getElementById('load-pronosticos').innerText = "⚠️ Error al conectar con Pronósticos."; }
+        }
+
+        window.onload = function() {
+            cargarClasificacion();
+            cargarCopa();
+            cargarPronosticos();
+        };
+    </script>
+</body>
+</html>
