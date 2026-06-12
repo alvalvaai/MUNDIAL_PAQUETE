@@ -250,13 +250,11 @@
                     let gLocal = fila[4];
                     let gVisitante = fila[5];
 
-                    // Si pertenece a una fase eliminatoria, lo guardamos por separado
                     if(["1/16 F", "1/8 F", "1/4 F", "1/2 F", "FINAL"].includes(grupo)) {
                         partidosEliminatoriasMapeados[grupo].push({ local, visitante, gLocal, gVisitante });
                         continue;
                     }
 
-                    // Procesamiento estándar de Fase de Grupos
                     if(grupo === "" || grupo.toLowerCase().includes("tabla")) continue;
                     if(!datosGrupos[grupo]) { datosGrupos[grupo] = { partidos: [], equipos: {} }; }
                     if(!datosGrupos[grupo].equipos[local]) datosGrupos[grupo].equipos[local] = { pj:0, dg:0, pts:0 };
@@ -330,13 +328,14 @@
                 });
 
                 document.getElementById('load-copa').style.display = 'none';
+                
+                // 🔥 CRÍTICO: Forzamos a dibujar los cruces con los nuevos datos calculados
                 generarCuadroCruces();
 
             } catch(e) { console.error(e); document.getElementById('load-copa').innerText = "⚠️ Error al conectar con la pestaña Copa."; }
         }
 
         function generarCuadroCruces() {
-            // Calcular posiciones teóricas automáticas basadas en la Fase de Grupos
             let posiciones = {};
             Object.keys(gruposGlobalesMapeados).forEach(gName => {
                 let eqData = gruposGlobalesMapeados[gName].equipos;
@@ -345,11 +344,12 @@
             });
 
             let getEqTeorico = (grupo, pos) => {
-                if (posiciones[grupo] && posiciones[grupo][pos - 1]) return posiciones[grupo][pos - 1].name;
+                if (posiciones[grupo] && posiciones[grupo][pos - 1] && posiciones[grupo][pos - 1].name) {
+                    return posiciones[grupo][pos - 1].name;
+                }
                 return `${pos}° ${grupo}`;
             };
 
-            // Esquema base automático
             let llavesProvisionales = [
                 { tag: "Cruce 1", l: getEqTeorico("Grupo A", 1), v: getEqTeorico("Grupo B", 4) },
                 { tag: "Cruce 2", l: getEqTeorico("Grupo C", 2), v: getEqTeorico("Grupo D", 3) },
@@ -371,10 +371,10 @@
 
             let html = "";
 
-            // 1. COLUMNA 1/16 DE FINAL (Sobreescribe si hay datos en Excel)
+            // 1. COLUMNA 1/16 DE FINAL
             html += `<div class="ronda-columna"><div class="ronda-titulo-cruces">1/16 Final</div>`;
             for(let i = 0; i < 16; i++) {
-                let pExcel = partidosEliminatoriasMapeados["1/16 F"][i];
+                let pExcel = partidosEliminatoriasMapeados["1/16 F"] ? partidosEliminatoriasMapeados["1/16 F"][i] : null;
                 let local = pExcel ? pExcel.local : llavesProvisionales[i].l;
                 let visitante = pExcel ? pExcel.visitante : llavesProvisionales[i].v;
                 let marcador = (pExcel && pExcel.gLocal !== "" && pExcel.gLocal !== undefined) ? `${pExcel.gLocal} - ${pExcel.gVisitante}` : "-";
@@ -386,10 +386,10 @@
             }
             html += `</div>`;
 
-            // 2. COLUMNA OCTAVOS (1/8 F)
+            // 2. COLUMNA OCTAVOS
             html += `<div class="ronda-columna"><div class="ronda-titulo-cruces">Octavos de Final</div>`;
             for(let i = 0; i < 8; i++) {
-                let pExcel = partidosEliminatoriasMapeados["1/8 F"][i];
+                let pExcel = partidosEliminatoriasMapeados["1/8 F"] ? partidosEliminatoriasMapeados["1/8 F"][i] : null;
                 let local = pExcel ? pExcel.local : "Por definir";
                 let visitante = pExcel ? pExcel.visitante : "Por definir";
                 let marcador = (pExcel && pExcel.gLocal !== "" && pExcel.gLocal !== undefined) ? `${pExcel.gLocal} - ${pExcel.gVisitante}` : "-";
@@ -405,10 +405,10 @@
             }
             html += `</div>`;
 
-            // 3. COLUMNA CUARTOS (1/4 F)
+            // 3. COLUMNA CUARTOS
             html += `<div class="ronda-columna"><div class="ronda-titulo-cruces">Cuartos de Final</div>`;
             for(let i = 0; i < 4; i++) {
-                let pExcel = partidosEliminatoriasMapeados["1/4 F"][i];
+                let pExcel = partidosEliminatoriasMapeados["1/4 F"] ? partidosEliminatoriasMapeados["1/4 F"][i] : null;
                 let local = pExcel ? pExcel.local : "Por definir";
                 let visitante = pExcel ? pExcel.visitante : "Por definir";
                 let marcador = (pExcel && pExcel.gLocal !== "" && pExcel.gLocal !== undefined) ? `${pExcel.gLocal} - ${pExcel.gVisitante}` : "-";
@@ -424,10 +424,10 @@
             }
             html += `</div>`;
 
-            // 4. COLUMNA SEMIFINALES (1/2 F)
+            // 4. COLUMNA SEMIFINALES
             html += `<div class="ronda-columna"><div class="ronda-titulo-cruces">Semifinales</div>`;
             for(let i = 0; i < 2; i++) {
-                let pExcel = partidosEliminatoriasMapeados["1/2 F"][i];
+                let pExcel = partidosEliminatoriasMapeados["1/2 F"] ? partidosEliminatoriasMapeados["1/2 F"][i] : null;
                 let local = pExcel ? pExcel.local : "Por definir";
                 let visitante = pExcel ? pExcel.visitante : "Por definir";
                 let marcador = (pExcel && pExcel.gLocal !== "" && pExcel.gLocal !== undefined) ? `${pExcel.gLocal} - ${pExcel.gVisitante}` : "-";
@@ -444,7 +444,7 @@
             html += `</div>`;
 
             // 5. COLUMNA GRAN FINAL
-            let pFinal = partidosEliminatoriasMapeados["FINAL"][0];
+            let pFinal = partidosEliminatoriasMapeados["FINAL"] ? partidosEliminatoriasMapeados["FINAL"][0] : null;
             let locF = pFinal ? pFinal.local : "Por definir finalistas";
             let visF = pFinal ? pFinal.visitante : "";
             let marF = (pFinal && pFinal.gLocal !== "" && pFinal.gLocal !== undefined) ? `${pFinal.gLocal} - ${pFinal.gVisitante}` : "-";
@@ -455,7 +455,7 @@
                     <div class="cruce-card" style="border: 2px solid var(--accent); background: rgba(0,0,0,0.5);">
                         <span class="cruce-info-tag" style="color:var(--accent); text-align:center;">Partido por el Título</span>
                         <div class="partido-fila" style="padding: 10px 0;">
-                            ${visF === "" ? 
+                            ${!visF ? 
                             `<span class="team" style="color:var(--accent); font-weight:bold; text-align:center; width:100%;">${locF}</span>` :
                             `<span class="team" style="color:var(--accent); font-weight:bold;">${locF}</span><span class="score">${marF}</span><span class="team re" style="color:var(--accent); font-weight:bold;">${visF}</span>`}
                         </div>
@@ -470,37 +470,3 @@
                 let res = await fetch(URL_CSV_PRONOSTICOS);
                 let text = await res.text();
                 let filas = parsearCSV(text);
-                if(filas.length === 0) return;
-
-                let headerHTML = "<tr>";
-                filas[0].forEach((col, idx) => {
-                    if(idx === 0) headerHTML += `<th class="jugador-header">${col}</th>`;
-                    else headerHTML += `<th>${col}</th>`;
-                });
-                headerHTML += "</tr>";
-                document.getElementById('header-pronosticos').innerHTML = headerHTML;
-
-                let bodyHTML = "";
-                for(let i = 1; i < filas.length; i++) {
-                    bodyHTML += "<tr>";
-                    filas[i].forEach((col, idx) => {
-                        if(idx === 0) bodyHTML += `<td class="jugador-celda">${col}</td>`;
-                        else if(idx === filas[i].length - 1 || filas[0][idx].toLowerCase() === 'total') bodyHTML += `<td class="celda-total">${col}</td>`;
-                        else { let val = col.trim(); bodyHTML += `<td class="celda-pronostico">${val === "" ? "-" : val}</td>`; }
-                    });
-                    bodyHTML += "</tr>";
-                }
-                document.getElementById('body-pronosticos').innerHTML = bodyHTML;
-                document.getElementById('load-pronosticos').style.display = 'none';
-                document.getElementById('tabla-pronosticos').style.display = 'table';
-            } catch(e) { console.error(e); document.getElementById('load-pronosticos').innerText = "⚠️ Error al conectar con Pronósticos."; }
-        }
-
-        window.onload = function() {
-            cargarClasificacion();
-            cargarCopa();
-            cargarPronosticos();
-        };
-    </script>
-</body>
-</html>
