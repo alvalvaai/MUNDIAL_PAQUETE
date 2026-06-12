@@ -65,7 +65,7 @@
         
         .pos-destacada { font-weight: bold; color: var(--accent); background: rgba(250, 204, 21, 0.1); padding: 4px 8px; border-radius: 6px; }
 
-        /* DISEÑO ORIGINAL EN REJILLA POR GRUPOS */
+        /* DISEÑO EN REJILLA POR GRUPOS */
         .grid-grupos {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
@@ -88,13 +88,11 @@
             font-size: 1.3rem;
         }
 
-        /* TABLA MINI DENTRO DE CADA GRUPO */
         .mini-tabla { font-size: 0.8rem; margin-bottom: 15px; }
         .mini-tabla th { padding: 4px; font-size: 0.75rem; }
         .mini-tabla td { padding: 5px 4px; }
         .txt-pts { font-weight: bold; color: var(--accent); }
 
-        /* PARTIDOS SEPARADOS POR JORNADAS */
         .jornada-titulo {
             font-size: 0.75rem;
             color: var(--accent);
@@ -129,6 +127,51 @@
             font-size: 0.85rem;
         }
 
+        /* ESTRUCTURA DEL CUADRO DE ELIMINATORIAS (ARBOL DE CRUCES) */
+        .arbol-cruces {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding: 20px 10px;
+            align-items: center;
+        }
+        .ronda-columna {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            min-width: 240px;
+            height: 100%;
+        }
+        .ronda-titulo-cruces {
+            text-align: center;
+            color: var(--accent);
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border);
+        }
+        .cruce-card {
+            background: var(--grid-bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 10px;
+            margin: 15px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .cruce-info-tag {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 4px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 2px;
+        }
+
         .loading { text-align: center; font-size: 1.2rem; color: var(--accent); padding: 40px; font-weight: bold; }
     </style>
 </head>
@@ -142,6 +185,7 @@
     <div class="tabs">
         <button id="btn-clasificacion" class="tab-btn active" onclick="cambiarVista('clasificacion')">📊 Clasificación General</button>
         <button id="btn-copa" class="tab-btn" onclick="cambiarVista('fase-copa')">⚔️ Copa (Fase de Grupos)</button>
+        <button id="btn-cruces" class="tab-btn" onclick="cambiarVista('fases-finales')">🌳 Fases Finales (Cruces)</button>
         <button id="btn-pronosticos" class="tab-btn" onclick="cambiarVista('pronosticos')">📝 Pronósticos Jugadores</button>
     </div>
 
@@ -162,6 +206,15 @@
             <div id="grid-contenedor-grupos" class="grid-grupos"></div>
         </div>
 
+        <div id="fases-finales" class="vista">
+            <div class="wrapper-tabla" style="overflow-x: auto;">
+                <h2>Cuadro de Eliminatorias Directas</h2>
+                <div id="arbol-contenedor" class="arbol-cruces">
+                    <p style="text-align:center; width:100%; color:var(--text-muted);">Calculando emparejamientos en base a la fase de grupos...</p>
+                </div>
+            </div>
+        </div>
+
         <div id="pronosticos" class="vista">
             <div class="wrapper-tabla">
                 <h2>Predicciones de Todos los Participantes</h2>
@@ -175,10 +228,11 @@
     </div>
 
     <script>
-        // Enlaces automáticos e inyectados directamente de tu Google Sheets
         const URL_CSV_CLASIFICACION = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=926016432&single=true&output=csv";
         const URL_CSV_COPA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=1380530497&single=true&output=csv";
         const URL_CSV_PRONOSTICOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=39491990&single=true&output=csv";
+
+        let gruposGlobalesMapeados = {};
 
         function parsearCSV(texto) {
             let lineas = texto.split(/\r?\n/);
@@ -203,6 +257,7 @@
             document.getElementById(idVista).classList.add('active');
             if(idVista === 'clasificacion') document.getElementById('btn-clasificacion').classList.add('active');
             if(idVista === 'fase-copa') document.getElementById('btn-copa').classList.add('active');
+            if(idVista === 'fases-finales') document.getElementById('btn-cruces').classList.add('active');
             if(idVista === 'pronosticos') document.getElementById('btn-pronosticos').classList.add('active');
         }
 
@@ -242,7 +297,6 @@
 
                 let datosGrupos = {};
 
-                // Procesar filas del Excel
                 for(let i = 1; i < filas.length; i++) {
                     let fila = filas[i];
                     if(fila.length < 4) continue;
@@ -257,11 +311,9 @@
                         datosGrupos[grupo] = { partidos: [], equipos: {} };
                     }
 
-                    // Inicializar equipos en el cálculo de puntos estadísticos de la mini-tabla
                     if(!datosGrupos[grupo].equipos[local]) datosGrupos[grupo].equipos[local] = { pj:0, dg:0, pts:0 };
                     if(!datosGrupos[grupo].equipos[visitante]) datosGrupos[grupo].equipos[visitante] = { pj:0, dg:0, pts:0 };
 
-                    // Si hay marcador puesto, computamos estadísticas en tiempo real
                     if(gLocal !== "" && gLocal !== undefined && gVisitante !== "" && gVisitante !== undefined) {
                         let gl = parseInt(gLocal);
                         let gv = parseInt(gVisitante);
@@ -284,30 +336,22 @@
                     datosGrupos[grupo].partidos.push({ local, visitante, gLocal, gVisitante });
                 }
 
+                gruposGlobalesMapeados = datosGrupos; // Guardar para generar los cruces
+
                 let contenedor = document.getElementById('grid-contenedor-grupos');
                 contenedor.innerHTML = "";
 
-                // Dibujar las cajas estructuradas por cada Grupo ordenadamente
                 Object.keys(datosGrupos).sort().forEach(gName => {
                     let gData = datosGrupos[gName];
-                    
                     let boxHTML = `<div class="grupo-box"><h3>${gName}</h3>`;
-                    
-                    // 1. Generar la minitabla interna del grupo
                     boxHTML += `
                         <table class="mini-tabla">
                             <thead>
-                                <tr>
-                                    <th>Equipo</th>
-                                    <th style="text-align:center;">PJ</th>
-                                    <th style="text-align:center;">DG</th>
-                                    <th style="text-align:center;">PTS</th>
-                                </tr>
+                                <tr><th>Equipo</th><th style="text-align:center;">PJ</th><th style="text-align:center;">DG</th><th style="text-align:center;">PTS</th></tr>
                             </thead>
                             <tbody>
                     `;
 
-                    // Ordenar equipos por puntos y diferencia de goles
                     let equiposOrdenados = Object.keys(gData.equipos).map(name => {
                         return { name, ...gData.equipos[name] };
                     }).sort((a,b) => b.pts - a.pts || b.dg - a.dg);
@@ -324,7 +368,6 @@
                     });
                     boxHTML += `</tbody></table>`;
 
-                    // 2. Insertar los enfrentamientos de las Jornadas de forma limpia (Cada 2 partidos es una jornada)
                     gData.partidos.forEach((p, idx) => {
                         if(idx === 0) boxHTML += `<div class="jornada-titulo">Jornada 1</div>`;
                         if(idx === 2) boxHTML += `<div class="jornada-titulo">Jornada 2</div>`;
@@ -349,10 +392,112 @@
                 });
 
                 document.getElementById('load-copa').style.display = 'none';
+                generarCuadroCruces();
+
             } catch(e) { 
                 console.error(e);
                 document.getElementById('load-copa').innerText = "⚠️ Error al conectar con la pestaña Copa."; 
             }
+        }
+
+        function generarCuadroCruces() {
+            // Extraer posiciones de todos los grupos del A al H
+            let posiciones = {};
+            Object.keys(gruposGlobalesMapeados).forEach(gName => {
+                let eqData = gruposGlobalesMapeados[gName].equipos;
+                let ordenados = Object.keys(eqData).map(name => {
+                    return { name, ...eqData[name] };
+                }).sort((a,b) => b.pts - a.pts || b.dg - a.dg);
+                posiciones[gName] = ordenados;
+            });
+
+            // Función auxiliar para obtener equipo de forma segura
+            let getEq = (grupo, pos) => {
+                if (posiciones[grupo] && posiciones[grupo][pos - 1]) {
+                    return posiciones[grupo][pos - 1].name;
+                }
+                return `${pos}° ${grupo}`;
+            };
+
+            // Definición de emparejamientos estándar de 1/16 de final cruzando grupos
+            let llaves16 = [
+                { tag: "Cruce 1", l: getEq("Grupo A", 1), v: getEq("Grupo B", 4) },
+                { tag: "Cruce 2", l: getEq("Grupo C", 2), v: getEq("Grupo D", 3) },
+                { tag: "Cruce 3", l: getEq("Grupo E", 1), v: getEq("Grupo F", 4) },
+                { tag: "Cruce 4", l: getEq("Grupo G", 2), v: getEq("Grupo H", 3) },
+                { tag: "Cruce 5", l: getEq("Grupo B", 1), v: getEq("Grupo A", 4) },
+                { tag: "Cruce 6", l: getEq("Grupo D", 2), v: getEq("Grupo C", 3) },
+                { tag: "Cruce 7", l: getEq("Grupo F", 1), v: getEq("Grupo E", 4) },
+                { tag: "Cruce 8", l: getEq("Grupo H", 2), v: getEq("Grupo G", 3) },
+                { tag: "Cruce 9", l: getEq("Grupo C", 1), v: getEq("Grupo D", 4) },
+                { tag: "Cruce 10", l: getEq("Grupo A", 2), v: getEq("Grupo B", 3) },
+                { tag: "Cruce 11", l: getEq("Grupo G", 1), v: getEq("Grupo H", 4) },
+                { tag: "Cruce 12", l: getEq("Grupo E", 2), v: getEq("Grupo F", 3) },
+                { tag: "Cruce 13", l: getEq("Grupo D", 1), v: getEq("Grupo C", 4) },
+                { tag: "Cruce 14", l: getEq("Grupo B", 2), v: getEq("Grupo A", 3) },
+                { tag: "Cruce 15", l: getEq("Grupo F", 2), v: getEq("Grupo E", 3) },
+                { tag: "Cruce 16", l: getEq("Grupo H", 1), v: getEq("Grupo G", 4) }
+            ];
+
+            let html = "";
+
+            // 1. COLUMNA 1/16 DE FINAL
+            html += `<div class="ronda-columna"><div class="ronda-titulo-cruces">1/16 Final</div>`;
+            llaves16.forEach(c => {
+                html += `
+                    <div class="cruce-card">
+                        <span class="cruce-info-tag">${c.tag}</span>
+                        <div class="partido-fila"><span class="team">${c.l}</span><span class="score">-</span><span class="team re">${c.v}</span></div>
+                    </div>`;
+            });
+            html += `</div>`;
+
+            // 2. COLUMNA OCTAVOS (1/8)
+            html += `<div class="ronda-columna"><div class="ronda-titulo-cruces">Octavos de Final</div>`;
+            for(let i=1; i<=8; i++) {
+                html += `
+                    <div class="cruce-card" style="margin: 40px 0;">
+                        <span class="cruce-info-tag">Ganador C${i*2-1} VS C${i*2}</span>
+                        <div class="partido-fila"><span class="team" style="color:var(--text-muted);">Por definir</span><span class="score">-</span><span class="team re" style="color:var(--text-muted);">Por definir</span></div>
+                    </div>`;
+            }
+            html += `</div>`;
+
+            // 3. COLUMNA CUARTOS (1/4)
+            html += `<div class="ronda-columna"><div class="ronda-titulo-cruces">Cuartos de Final</div>`;
+            for(let i=1; i<=4; i++) {
+                html += `
+                    <div class="cruce-card" style="margin: 110px 0;">
+                        <span class="cruce-info-tag">Cuartos M${i}</span>
+                        <div class="partido-fila"><span class="team" style="color:var(--text-muted);">Por definir</span><span class="score">-</span><span class="team re" style="color:var(--text-muted);">Por definir</span></div>
+                    </div>`;
+            }
+            html += `</div>`;
+
+            // 4. COLUMNA SEMIFINALES
+            html += `<div class="ronda-columna"><div class="ronda-titulo-cruces">Semifinales</div>`;
+            for(let i=1; i<=2; i++) {
+                html += `
+                    <div class="cruce-card" style="margin: 250px 0;">
+                        <span class="cruce-info-tag">Semifinal S${i}</span>
+                        <div class="partido-fila"><span class="team" style="color:var(--text-muted);">Por definir</span><span class="score">-</span><span class="team re" style="color:var(--text-muted);">Por definir</span></div>
+                    </div>`;
+            }
+            html += `</div>`;
+
+            // 5. COLUMNA GRAN FINAL
+            html += `
+                <div class="ronda-columna">
+                    <div class="ronda-titulo-cruces" style="border-color:var(--accent); background:rgba(250,204,21,0.1);">🏆 Gran Final</div>
+                    <div class="cruce-card" style="border: 2px solid var(--accent); background: rgba(0,0,0,0.5);">
+                        <span class="cruce-info-tag" style="color:var(--accent); text-align:center;">Partido por el Título</span>
+                        <div class="partido-fila" style="padding: 15px 0;">
+                            <span class="team" style="color:var(--accent); font-weight:bold; text-align:center; width:100%;">Por definir finalistas</span>
+                        </div>
+                    </div>
+                </div>`;
+
+            document.getElementById('arbol-contenedor').innerHTML = html;
         }
 
         async function cargarPronosticos() {
