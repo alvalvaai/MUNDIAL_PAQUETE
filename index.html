@@ -111,6 +111,23 @@
         .celda-pronostico { font-family: 'Courier New', Courier, monospace; font-weight: bold; color: var(--accent); background: rgba(0, 0, 0, 0.2); min-width: 38px; letter-spacing: 0.5px; }
         .celda-total { font-weight: bold; color: #fff; background-color: rgba(234, 179, 8, 0.25) !important; }
 
+        /* DISEÑO DE LA CONTENEDOR DEL RESUMEN DE LA IA */
+        .resumen-container {
+            background-color: #03190b;
+            border-left: 5px solid var(--accent);
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #ffffff;
+            max-width: 850px;
+            margin: 20px auto;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+            border-top: 1px solid rgba(250, 204, 21, 0.1);
+            border-right: 1px solid rgba(250, 204, 21, 0.1);
+            border-bottom: 1px solid rgba(250, 204, 21, 0.1);
+        }
+
         .loading { text-align: center; font-size: 1.2rem; color: var(--accent); padding: 40px; font-weight: bold; }
     </style>
 </head>
@@ -126,6 +143,7 @@
         <button id="btn-copa" class="tab-btn" onclick="cambiarVista('fase-copa')">⚔️ Copa</button>
         <button id="btn-cruces" class="tab-btn" onclick="cambiarVista('fases-finales')">🌳 Cruces</button>
         <button id="btn-pronosticos" class="tab-btn" onclick="cambiarVista('pronosticos')">📝 Pronósticos</button>
+        <button id="btn-resumen" class="tab-btn" onclick="cambiarVista('resumen-ia')">🎙️ Resumen Diario</button>
     </div>
 
     <div class="container">
@@ -166,12 +184,23 @@
                 </div>
             </div>
         </div>
+
+        <div id="resumen-ia" class="vista">
+            <div class="wrapper-tabla">
+                <h2>🎙️ El Micrófono de la IA - Crónica Diaria</h2>
+                <div id="load-resumen" class="loading">Sintonizando los micrófonos de la IA...</div>
+                <div id="texto-resumen-ia" class="resumen-container" style="display:none;"></div>
+            </div>
+        </div>
     </div>
 
     <script>
         const URL_CSV_CLASIFICACION = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=926016432&single=true&output=csv";
         const URL_CSV_COPA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=1380530497&single=true&output=csv";
         const URL_CSV_PRONOSTICOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=39491990&single=true&output=csv";
+        
+        // ¡REEMPLAZA ESTE ENLACE con el CSV de tu pestaña Resumen_IA publicada!
+        const URL_CSV_RESUMEN = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=AQUÍ_EL_ID_DE_TU_PESTAÑA_RESUMEN&single=true&output=csv";
 
         let gruposGlobalesMapeados = {};
         let partidosEliminatoriasMapeados = { "1/16 F": [], "1/8 F": [], "1/4 F": [], "1/2 F": [], "FINAL": [] };
@@ -201,6 +230,7 @@
             if(idVista === 'fase-copa') document.getElementById('btn-copa').classList.add('active');
             if(idVista === 'fases-finales') document.getElementById('btn-cruces').classList.add('active');
             if(idVista === 'pronosticos') document.getElementById('btn-pronosticos').classList.add('active');
+            if(idVista === 'resumen-ia') document.getElementById('btn-resumen').classList.add('active'); // Activador visual del nuevo botón
         }
 
         async function cargarClasificacion() {
@@ -496,10 +526,38 @@
             } catch(e) { console.error(e); document.getElementById('load-pronosticos').innerText = "⚠️ Error al conectar con Pronósticos."; }
         }
 
+        // NUEVA FUNCIÓN PARA CARGAR EL RESUMEN GENERADO POR LA IA
+        async function cargarResumenDiario() {
+            try {
+                let res = await fetch(URL_CSV_RESUMEN);
+                let text = await res.text();
+                
+                let textoLimpio = text.trim();
+                // Limpiar comillas si Google Sheets las añade al envolver la celda
+                if (textoLimpio.startsWith('"') && textoLimpio.endsWith('"')) {
+                    textoLimpio = textoLimpio.substring(1, textoLimpio.length - 1);
+                }
+                
+                // Formatear saltos de línea y soporte básico para formato negrita (Markdown **) que usa Gemini
+                let textoFormateado = textoLimpio
+                    .replace(/\\n/g, '<br>')
+                    .replace(/\n/g, '<br>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+                document.getElementById('texto-resumen-ia').innerHTML = textoFormateado;
+                document.getElementById('load-resumen').style.display = 'none';
+                document.getElementById('texto-resumen-ia').style.display = 'block';
+            } catch(e) { 
+                console.error(e); 
+                document.getElementById('load-resumen').innerText = "⚠️ No se ha podido sintonizar la radio de la IA. ¡Revisa el enlace CSV!"; 
+            }
+        }
+
         window.onload = function() {
             cargarClasificacion();
             cargarCopa();
             cargarPronosticos();
+            cargarResumenDiario(); // Llama a la carga del resumen al arrancar la web
         };
     </script>
 </body>
