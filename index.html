@@ -366,22 +366,7 @@
     }
 }
 
-                if(countHoy === 0) {
-                    document.getElementById('lista-hoy').innerHTML = `<p style="text-align:center;color:var(--text-muted); padding: 20px;">No hay más partidos programados en el cuadrante para la jornada de hoy (${fechaHoy}).</p>`;
-                } else {
-                    document.getElementById('lista-hoy').innerHTML = htmlHoy;
-                }
-                document.getElementById('load-hoy').style.display = 'none';
-
-                document.getElementById('lista-calendario-total').innerHTML = htmlCalendarioTotal;
-                document.getElementById('load-calendario').style.display = 'none';
-
-            } catch(e) {
-                console.error(e);
-                document.getElementById('load-hoy').innerText = "⚠️ Error al procesar partidos de hoy.";
-                document.getElementById('load-calendario').innerText = "⚠️ Error al procesar el calendario completo.";
-            }
-        }
+                
 
         async function cargarClasificacion() {
             try {
