@@ -664,16 +664,24 @@
             } catch(e) { console.error(e); document.getElementById('load-pronosticos').innerText = "⚠️ Error al conectar con Pronósticos."; }
         }
 
-        // NUEVA FUNCIÓN PARA CARGAR EL RESUMEN GENERADO POR LA IA
+        // NUEVA FUNCIÓN PARA CARGAR EL RESUMEN GENERADO POR LA IA (VERSIÓN DEFINITIVA)
         async function cargarResumenDiario() {
             try {
-                // Usamos la URL directamente para evitar conflictos de variables repetidas
-                let res = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=1115447444&single=true&output=csv");
-                let text = await res.text();
+                // Añadimos un parámetro de tiempo al final de la URL para romper la caché del navegador
+                let urlConCacheBuster = URL_CSV_RESUMEN + (URL_CSV_RESUMEN.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
                 
+                let res = await fetch(urlConCacheBuster);
+                if (!res.ok) throw new Error("Error en la respuesta del servidor: " + res.status);
+                
+                let text = await res.text();
                 let textoLimpio = text.trim();
                 
-                // Limpiar comillas si Google Sheets las añade al envolver la celda
+                // Si la celda viene vacía o da error de Google
+                if (!textoLimpio || textoLimpio.includes("<!DOCTYPE html>")) {
+                    throw new Error("El enlace no devuelve un CSV válido. Revisa que esté publicado en la web.");
+                }
+                
+                // Limpiar comillas si Google Sheets las añade al envolver la celda completa
                 if (textoLimpio.startsWith('"') && textoLimpio.endsWith('"')) {
                     textoLimpio = textoLimpio.substring(1, textoLimpio.length - 1);
                 }
@@ -691,8 +699,9 @@
                 document.getElementById('load-resumen').style.display = 'none';
                 document.getElementById('texto-resumen-ia').style.display = 'block';
             } catch(e) { 
-                console.error(e); 
-                document.getElementById('load-resumen').innerText = "⚠️ No se ha podido sintonizar la radio de la IA. ¡Revisa el enlace CSV!"; 
+                console.error("Error capturado:", e); 
+                // Te pintamos el error exacto en pantalla para que sepamos qué lo detiene
+                document.getElementById('load-resumen').innerHTML = `⚠️ Error: <span style="color:#ff4d4d; font-weight:bold;">${e.message}</span>`; 
             }
         }
 
