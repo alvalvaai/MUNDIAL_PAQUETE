@@ -706,21 +706,24 @@
         }
 
         window.onload = function() {
-            // IA (Ya sabemos que esta funciona)
-            try { cargarResumenDiario(); } catch(e) { console.error("Error en Resumen:", e); }
+    // Protección individual para cada función
+    const funciones = [
+        { nombre: "Resumen", fn: cargarResumenDiario },
+        { nombre: "Clasificación", fn: cargarClasificacion },
+        { nombre: "Copa", fn: cargarCopa },
+        { nombre: "Pronósticos", fn: cargarPronosticos }
+    ];
 
-            // Partidos y Clasificación (Vamos a ver por qué fallan)
-            try { cargarClasificacion(); } catch(e) { 
-                console.error("Error en Clasificación:", e); 
-                alert("Error en Clasificación: " + e.message); // Esto te dirá qué falla en una ventana emergente
+    funciones.forEach(item => {
+        try {
+            if (typeof item.fn === "function") {
+                item.fn();
             }
-            try { cargarCopa(); } catch(e) { 
-                console.error("Error en Copa:", e); 
-            }
-            try { cargarPronosticos(); } catch(e) { 
-                console.error("Error en Pronosticos:", e); 
-            }
-        };
+        } catch (e) {
+            console.error(`Error crítico en ${item.nombre}:`, e);
+        }
+    });
+};
     </script>
 </body>
 </html>
