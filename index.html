@@ -706,11 +706,17 @@
         }
 
         window.onload = function() {
-            cargarClasificacion();
-            cargarCopa();
-            cargarPartidosYCalendario();
-            cargarPronosticos();
-            cargarResumenIA();
+            // Ejecutamos el resumen de la IA primero y de forma segura
+            try {
+                cargarResumenDiario();
+            } catch(e) {
+                console.error("Error al iniciar el resumen:", e);
+            }
+
+            // Luego se ejecutan las demás funciones de las tablas
+            try { cargarClasificacion(); } catch(e) { console.error(e); }
+            try { cargarCopa(); } catch(e) { console.error(e); }
+            try { cargarPronosticos(); } catch(e) { console.error(e); }
         };
     </script>
 </body>
