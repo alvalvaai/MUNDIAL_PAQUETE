@@ -665,37 +665,37 @@
         }
 
         // NUEVA FUNCIÓN PARA CARGAR EL RESUMEN GENERADO POR LA IA (CORREGIDA)
-async function cargarResumenDiario() {
-    try {
-        let res = await fetch(URL_CSV_RESUMEN);
-        let text = await res.text();
+        async function cargarResumenDiario() {
+            try {
+                let res = await fetch(URL_CSV_RESUMEN);
+                let text = await res.text();
+                
+                let textoLimpio = text.trim();
+                
+                // 1. Limpiar comillas exteriores que Google Sheets mete a la fuerza en los CSV para celdas multilínea
+                if (textoLimpio.startsWith('"') && textoLimpio.endsWith('"')) {
+                    textoLimpio = textoLimpio.substring(1, textoLimpio.length - 1);
+                }
+                
+                // 2. Google Sheets duplica las comillas internas ("" -> ") al exportar, las devolvemos a la normalidad
+                textoLimpio = textoLimpio.replace(/""/g, '"');
+                
+                // 3. Formatear saltos de línea (tanto literales \n como reales del string del CSV)
+                // Y aplicar el formateo de negritas (**) que genera Gemini
+                let textoFormateado = textoLimpio
+                    .replace(/\\n/g, '<br>') 
+                    .replace(/\n/g, '<br>')  // Convierte los saltos de línea reales del CSV en saltos HTML
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         
-        let textoLimpio = text.trim();
-        
-        // 1. Limpiar comillas exteriores que Google Sheets mete a la fuerza en los CSV para celdas multilínea
-        if (textoLimpio.startsWith('"') && textoLimpio.endsWith('"')) {
-            textoLimpio = textoLimpio.substring(1, textoLimpio.length - 1);
+                // Renderizar en el contenedor
+                document.getElementById('texto-resumen-ia').innerHTML = textoFormateado;
+                document.getElementById('load-resumen').style.display = 'none';
+                document.getElementById('texto-resumen-ia').style.display = 'block';
+            } catch(e) { 
+                console.error(e); 
+                document.getElementById('load-resumen').innerText = "⚠️ No se ha podido sintonizar la radio de la IA. ¡Revisa el enlace CSV!"; 
+            }
         }
-        
-        // 2. Google Sheets duplica las comillas internas ("" -> ") al exportar, las devolvemos a la normalidad
-        textoLimpio = textoLimpio.replace(/""/g, '"');
-        
-        // 3. Formatear saltos de línea (tanto literales \n como reales del string del CSV)
-        // Y aplicar el formateo de negritas (**) que genera Gemini
-        let textoFormateado = textoLimpio
-            .replace(/\\n/g, '<br>') 
-            .replace(/\n/g, '<br>')  // Convierte los saltos de línea reales del CSV en saltos HTML
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-        // Renderizar en el contenedor
-        document.getElementById('texto-resumen-ia').innerHTML = textoFormateado;
-        document.getElementById('load-resumen').style.display = 'none';
-        document.getElementById('texto-resumen-ia').style.display = 'block';
-    } catch(e) { 
-        console.error(e); 
-        document.getElementById('load-resumen').innerText = "⚠️ No se ha podido sintonizar la radio de la IA. ¡Revisa el enlace CSV!"; 
-    }
-}
 
         window.onload = function() {
             cargarClasificacion();
