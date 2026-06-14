@@ -664,39 +664,43 @@
             } catch(e) { console.error(e); document.getElementById('load-pronosticos').innerText = "⚠️ Error al conectar con Pronósticos."; }
         }
 
-        // NUEVA FUNCIÓN PARA CARGAR EL RESUMEN GENERADO POR LA IA
+        // NUEVA FUNCIÓN PARA CARGAR EL RESUMEN GENERADO POR LA IA (A PRUEBA DE BOMBAS)
         async function cargarResumenDiario() {
-    try {
-        let res = await fetch(URL_CSV_RESUMEN);
-        let text = await res.text();
-        
-        // 1. Limpiar espacios o saltos vacíos al inicio y final del archivo completo
-        let textoLimpio = text.trim();
-        
-        // 2. Si Google Sheets lo envolvió todo en comillas dobles (típico de celdas multilínea en CSV)
-        if (textoLimpio.startsWith('"') && textoLimpio.endsWith('"')) {
-            textoLimpio = textoLimpio.substring(1, textoLimpio.length - 1);
-        }
-        
-        // 3. Reemplazar las comillas dobles repetidas ("" -> ") que mete Sheets para escapar texto
-        textoLimpio = textoLimpio.replace(/""/g, '"');
-        
-        // 4. Convertir saltos de línea (reales y literales) a HTML y aplicar negritas
-        let textoFormateado = textoLimpio
-            .replace(/\\n/g, '<br>')
-            .replace(/\n/g, '<br>')
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            try {
+                let res = await fetch(URL_CSV_RESUMEN);
+                let text = await res.text();
+                
+                // 1. Limpiar espacios o saltos muertos al inicio y fin del flujo de datos
+                let textoLimpio = text.trim();
+                
+                // 2. Quitar ÚNICAMENTE la comilla inicial y final que Sheets añade al CSV completo
+                if (textoLimpio.startsWith('"')) {
+                    textoLimpio = textoLimpio.substring(1);
+                }
+                if (textoLimpio.endsWith('"')) {
+                    textoLimpio = textoLimpio.substring(0, textoLimpio.length - 1);
+                }
+                
+                // 3. Limpiar las comillas dobles repetidas ("" -> ") causadas por la exportación
+                textoLimpio = textoLimpio.replace(/""/g, '"');
+                
+                // 4. Formatear saltos de línea (tanto si vienen como texto \n o como saltos reales)
+                // Y aplicar las negritas de Markdown (**) que genera Gemini
+                let textoFormateado = textoLimpio
+                    .replace(/\\n/g, '<br>')
+                    .replace(/\n/g, '<br>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
-        // 5. Inyectar el texto y alternar visibilidad de las capas
-        document.getElementById('texto-resumen-ia').innerHTML = textoFormateado;
-        document.getElementById('load-resumen').style.display = 'none';
-        document.getElementById('texto-resumen-ia').style.display = 'block';
-        
-    } catch(e) { 
-        console.error("Error cargando el resumen de la IA:", e); 
-        document.getElementById('load-resumen').innerText = "⚠️ No se ha podido sintonizar la radio de la IA. ¡Revisa el enlace CSV!"; 
-    }
-}
+                // 5. Mostrar en pantalla
+                document.getElementById('texto-resumen-ia').innerHTML = textoFormateado;
+                document.getElementById('load-resumen').style.display = 'none';
+                document.getElementById('texto-resumen-ia').style.display = 'block';
+                
+            } catch(e) { 
+                console.error(e); 
+                document.getElementById('load-resumen').innerText = "⚠️ No se ha podido sintonizar la radio de la IA. ¡Revisa el enlace CSV!"; 
+            }
+        }
 
         window.onload = function() {
             cargarClasificacion();
