@@ -82,6 +82,18 @@
             width: 16%; text-align: center; background: rgba(0,0,0,0.4); color: var(--accent); font-weight: bold; border-radius: 5px; padding: 2px 0; font-size: 0.85rem;
         }
 
+        /* NUEVOS ESTILOS PARA TARJETAS DE PARTIDOS (HOY Y CALENDARIO) */
+        .match-day-box { background: var(--grid-bg); padding: 14px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid var(--accent); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .match-time { font-size: 0.85rem; color: var(--accent); font-weight: bold; display: block; margin-bottom: 6px;}
+        .partido-fila-completa { display: flex; justify-content: space-between; align-items: center; font-size: 1rem; }
+        .bloque-equipo { width: 40%; display: flex; align-items: center; gap: 8px; font-weight: 500; }
+        .bloque-equipo.izq { justify-content: flex-start; }
+        .bloque-equipo.der { justify-content: flex-end; text-align: right; }
+        .banderita { font-size: 1.3rem; }
+        .score-box {
+            width: 16%; text-align: center; background: rgba(0,0,0,0.5); color: var(--accent); font-weight: bold; border-radius: 6px; padding: 6px 0; font-size: 1rem; border: 1px solid rgba(20, 184, 166, 0.3);
+        }
+
         /* ARBOL DE ELIMINATORIAS */
         .arbol-cruces { display: flex; gap: 15px; overflow-x: auto; padding: 15px 5px; align-items: center; }
         .ronda-columna { display: flex; flex-direction: column; justify-content: space-around; min-width: 230px; height: 100%; }
@@ -142,6 +154,8 @@
         <button id="btn-clasificacion" class="tab-btn active" onclick="cambiarVista('clasificacion')">📊 Clasificación</button>
         <button id="btn-copa" class="tab-btn" onclick="cambiarVista('fase-copa')">⚔️ Copa</button>
         <button id="btn-cruces" class="tab-btn" onclick="cambiarVista('fases-finales')">🌳 Cruces</button>
+        <button id="btn-hoy" class="tab-btn" onclick="cambiarVista('partidos-hoy')">📅 Partidos de Hoy</button>
+        <button id="btn-calendario" class="tab-btn" onclick="cambiarVista('calendario-completo')">🗓️ Calendario Total</button>
         <button id="btn-pronosticos" class="tab-btn" onclick="cambiarVista('pronosticos')">📝 Pronósticos</button>
         <button id="btn-resumen" class="tab-btn" onclick="cambiarVista('resumen-ia')">🎙️ Resumen Diario</button>
     </div>
@@ -172,6 +186,22 @@
             </div>
         </div>
 
+        <div id="partidos-hoy" class="vista">
+            <div class="wrapper-tabla">
+                <h2 id="titulo-hoy">Partidos de la Jornada</h2>
+                <div id="load-hoy" class="loading">Buscando partidos programados...</div>
+                <div id="lista-hoy"></div>
+            </div>
+        </div>
+
+        <div id="calendario-completo" class="vista">
+            <div class="wrapper-tabla">
+                <h2>Todos los Resultados y Calendario del Torneo</h2>
+                <div id="load-calendario" class="loading">Cargando historial de partidos...</div>
+                <div id="lista-calendario-total"></div>
+            </div>
+        </div>
+
         <div id="pronosticos" class="vista">
             <div class="wrapper-tabla">
                 <h2>Predicciones de los Participantes</h2>
@@ -198,9 +228,10 @@
         const URL_CSV_CLASIFICACION = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=926016432&single=true&output=csv";
         const URL_CSV_COPA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=1380530497&single=true&output=csv";
         const URL_CSV_PRONOSTICOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=39491990&single=true&output=csv";
-        
-        // ¡REEMPLAZA ESTE ENLACE con el CSV de tu pestaña Resumen_IA publicada!
         const URL_CSV_RESUMEN = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=1115447444&single=true&output=csv";
+        
+        // ⚠️ ENLACE A TU NUEVA PESTAÑA "Resul_Ban!" DE GOOGLE SHEETS
+        const URL_CSV_RESUL_BAN = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=615671047&single=true&output=csv";
 
         let gruposGlobalesMapeados = {};
         let partidosEliminatoriasMapeados = { "1/16 F": [], "1/8 F": [], "1/4 F": [], "1/2 F": [], "FINAL": [] };
@@ -226,11 +257,118 @@
             document.querySelectorAll('.vista').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(idVista).classList.add('active');
+            
             if(idVista === 'clasificacion') document.getElementById('btn-clasificacion').classList.add('active');
             if(idVista === 'fase-copa') document.getElementById('btn-copa').classList.add('active');
             if(idVista === 'fases-finales') document.getElementById('btn-cruces').classList.add('active');
+            if(idVista === 'partidos-hoy') document.getElementById('btn-hoy').classList.add('active');
+            if(idVista === 'calendario-completo') document.getElementById('btn-calendario').classList.add('active');
             if(idVista === 'pronosticos') document.getElementById('btn-pronosticos').classList.add('active');
-            if(idVista === 'resumen-ia') document.getElementById('btn-resumen').classList.add('active'); // Activador visual del nuevo botón
+            if(idVista === 'resumen-ia') document.getElementById('btn-resumen').classList.add('active');
+        }
+
+        // Control dinámico de zona horaria con límite de jornada a las 08:00 AM
+        function obtenerFechaJornadaActual() {
+            let ahora = new Date();
+            let hora = ahora.getHours();
+            if (hora >= 0 && hora < 8) {
+                ahora.setDate(ahora.getDate() - 1);
+            }
+            let dia = String(ahora.getDate()).padStart(2, '0');
+            let mes = String(ahora.getMonth() + 1).padStart(2, '0');
+            return `${dia}/${mes}`;
+        }
+
+        function banderitaFiltro(textoBandera) {
+            if(!textoBandera || textoBandera.includes("BUSCARV") || textoBandera.trim() === "") {
+                return "🏳️"; 
+            }
+            return textoBandera;
+        }
+
+        // NUEVA FUNCIÓN AUTOMATIZADA PARA CALENDARIO COMPLETO Y PARTIDOS DE HOY
+        async function cargarPartidosYCalendario() {
+            try {
+                let res = await fetch(URL_CSV_RESUL_BAN);
+                let text = await res.text();
+                let filas = parsearCSV(text);
+                if(filas.length === 0) return;
+
+                let fechaHoy = obtenerFechaJornadaActual();
+                document.getElementById('titulo-hoy').innerText = `📅 Partidos de la Jornada (${fechaHoy})`;
+
+                let htmlHoy = "";
+                let htmlCalendarioTotal = "";
+                let countHoy = 0;
+
+                for(let i = 1; i < filas.length; i++) {
+                    let fila = filas[i];
+                    if(fila.length < 8) continue;
+
+                    let fecha = fila[0];      
+                    let hora = fila[1];       
+                    let equipo1 = fila[2];    
+                    let bandera1 = fila[3].replace(/"/g, "");  
+                    let goles1 = fila[4];     
+                    let goles2 = fila[5];     
+                    let equipo2 = fila[6];    
+                    let bandera2 = fila[7].replace(/"/g, "");  
+
+                    let marcador = (goles1 !== "" && goles2 !== "") ? `${goles1} - ${goles2}` : "vs";
+
+                    // Acumulando para pestaña "Calendario Total"
+                    htmlCalendarioTotal += `
+                        <div class="match-day-box" style="border-left-color: var(--border);">
+                            <span class="match-time">📅 Fecha: ${fecha} | ⏰ Hora: ${hora} h</span>
+                            <div class="partido-fila-completa">
+                                <div class="bloque-equipo izq">
+                                    <span class="banderita">${banderitaFiltro(bandera1)}</span>
+                                    <span>${equipo1}</span>
+                                </div>
+                                <div class="score-box" style="background:rgba(0,0,0,0.2); color:#fff;">${marcador}</div>
+                                <div class="bloque-equipo der">
+                                    <span>${equipo2}</span>
+                                    <span class="banderita">${banderitaFiltro(bandera2)}</span>
+                                </div>
+                            </div>
+                        </div>`;
+
+                    // Filtrando para pestaña "Partidos de Hoy"
+                    if(fecha === fechaHoy) {
+                        countHoy++;
+                        htmlHoy += `
+                            <div class="match-day-box">
+                                <span class="match-time">⏰ Hora del Partido: ${hora} h</span>
+                                <div class="partido-fila-completa">
+                                    <div class="bloque-equipo izq">
+                                        <span class="banderita">${banderitaFiltro(bandera1)}</span>
+                                        <span>${equipo1}</span>
+                                    </div>
+                                    <div class="score-box">${marcador}</div>
+                                    <div class="bloque-equipo der">
+                                        <span>${equipo2}</span>
+                                        <span class="banderita">${banderitaFiltro(bandera2)}</span>
+                                    </div>
+                                </div>
+                            </div>`;
+                    }
+                }
+
+                if(countHoy === 0) {
+                    document.getElementById('lista-hoy').innerHTML = `<p style="text-align:center;color:var(--text-muted); padding: 20px;">No hay más partidos programados en el cuadrante para la jornada de hoy (${fechaHoy}).</p>`;
+                } else {
+                    document.getElementById('lista-hoy').innerHTML = htmlHoy;
+                }
+                document.getElementById('load-hoy').style.display = 'none';
+
+                document.getElementById('lista-calendario-total').innerHTML = htmlCalendarioTotal;
+                document.getElementById('load-calendario').style.display = 'none';
+
+            } catch(e) {
+                console.error(e);
+                document.getElementById('load-hoy').innerText = "⚠️ Error al procesar partidos de hoy.";
+                document.getElementById('load-calendario').innerText = "⚠️ Error al procesar el calendario completo.";
+            }
         }
 
         async function cargarClasificacion() {
@@ -526,38 +664,39 @@
             } catch(e) { console.error(e); document.getElementById('load-pronosticos').innerText = "⚠️ Error al conectar con Pronósticos."; }
         }
 
-        // NUEVA FUNCIÓN PARA CARGAR EL RESUMEN GENERADO POR LA IA
-        async function cargarResumenDiario() {
+        // FUNCIÓN INTEGRADA COMPLETA PARA EL RESUMEN DE LA IA
+        async function cargarResumenIA() {
             try {
                 let res = await fetch(URL_CSV_RESUMEN);
                 let text = await res.text();
-                
-                let textoLimpio = text.trim();
-                // Limpiar comillas si Google Sheets las añade al envolver la celda
-                if (textoLimpio.startsWith('"') && textoLimpio.endsWith('"')) {
-                    textoLimpio = textoLimpio.substring(1, textoLimpio.length - 1);
+                let filas = parsearCSV(text);
+                if(filas.length < 2) {
+                    document.getElementById('load-resumen').innerText = "ℹ️ No hay crónicas registradas todavía.";
+                    return;
                 }
                 
-                // Formatear saltos de línea y soporte básico para formato negrita (Markdown **) que usa Gemini
-                let textoFormateado = textoLimpio
-                    .replace(/\\n/g, '<br>')
-                    .replace(/\n/g, '<br>')
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-                document.getElementById('texto-resumen-ia').innerHTML = textoFormateado;
+                // Muestra la última fila (la más reciente del Sheets)
+                let ultimaFila = filas[filas.length - 1];
+                let textoCronica = ultimaFila[0] || "La IA se ha quedado sin palabras para hoy...";
+                
+                // Convertir saltos de línea del CSV en etiquetas HTML de párrafo
+                let formateado = textoCronica.replace(/\n/g, "<br>");
+                
+                document.getElementById('texto-resumen-ia').innerHTML = `<p>${formateado}</p>`;
                 document.getElementById('load-resumen').style.display = 'none';
                 document.getElementById('texto-resumen-ia').style.display = 'block';
-            } catch(e) { 
-                console.error(e); 
-                document.getElementById('load-resumen').innerText = "⚠️ No se ha podido sintonizar la radio de la IA. ¡Revisa el enlace CSV!"; 
+            } catch(e) {
+                console.error(e);
+                document.getElementById('load-resumen').innerText = "⚠️ Error al sintonizar la crónica de la IA.";
             }
         }
 
         window.onload = function() {
             cargarClasificacion();
             cargarCopa();
+            cargarPartidosYCalendario();
             cargarPronosticos();
-            cargarResumenDiario(); // Llama a la carga del resumen al arrancar la web
+            cargarResumenIA();
         };
     </script>
 </body>
