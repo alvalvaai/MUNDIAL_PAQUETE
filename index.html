@@ -706,17 +706,20 @@
         }
 
         window.onload = function() {
-            // Ejecutamos el resumen de la IA primero y de forma segura
-            try {
-                cargarResumenDiario();
-            } catch(e) {
-                console.error("Error al iniciar el resumen:", e);
-            }
+            // IA (Ya sabemos que esta funciona)
+            try { cargarResumenDiario(); } catch(e) { console.error("Error en Resumen:", e); }
 
-            // Luego se ejecutan las demás funciones de las tablas
-            try { cargarClasificacion(); } catch(e) { console.error(e); }
-            try { cargarCopa(); } catch(e) { console.error(e); }
-            try { cargarPronosticos(); } catch(e) { console.error(e); }
+            // Partidos y Clasificación (Vamos a ver por qué fallan)
+            try { cargarClasificacion(); } catch(e) { 
+                console.error("Error en Clasificación:", e); 
+                alert("Error en Clasificación: " + e.message); // Esto te dirá qué falla en una ventana emergente
+            }
+            try { cargarCopa(); } catch(e) { 
+                console.error("Error en Copa:", e); 
+            }
+            try { cargarPronosticos(); } catch(e) { 
+                console.error("Error en Pronosticos:", e); 
+            }
         };
     </script>
 </body>
