@@ -702,13 +702,14 @@
             }
         }
 
-        window.onload = function() {
+       window.onload = function() {
     // Protección individual para cada función
     const funciones = [
         { nombre: "Resumen", fn: cargarResumenDiario },
         { nombre: "Clasificación", fn: cargarClasificacion },
         { nombre: "Copa", fn: cargarCopa },
-        { nombre: "Pronósticos", fn: cargarPronosticos }
+        { nombre: "Pronósticos", fn: cargarPronosticos },
+        { nombre: "Partidos", fn: cargarPartidosYCalendario } // <--- ¡AÑADE ESTA LÍNEA!
     ];
 
     funciones.forEach(item => {
