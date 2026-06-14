@@ -288,71 +288,83 @@
 
         // NUEVA FUNCIÓN AUTOMATIZADA PARA CALENDARIO COMPLETO Y PARTIDOS DE HOY
         async function cargarPartidosYCalendario() {
-            try {
-                let res = await fetch(URL_CSV_RESUL_BAN);
-                let text = await res.text();
-                let filas = parsearCSV(text);
-                if(filas.length === 0) return;
+    try {
+        let res = await fetch(URL_CSV_RESUL_BAN);
+        let text = await res.text();
+        let filas = parsearCSV(text);
+        if(filas.length === 0) return;
 
-                let fechaHoy = obtenerFechaJornadaActual();
-                document.getElementById('titulo-hoy').innerText = `📅 Partidos de la Jornada (${fechaHoy})`;
+        let fechaHoy = obtenerFechaJornadaActual();
+        document.getElementById('titulo-hoy').innerText = `📅 Partidos de la Jornada (${fechaHoy})`;
 
-                let htmlHoy = "";
-                let htmlCalendarioTotal = "";
-                let countHoy = 0;
+        let htmlHoy = "";
+        let htmlCalendarioTotal = "";
+        let countHoy = 0;
 
-                for(let i = 1; i < filas.length; i++) {
-                    let fila = filas[i];
-                    if(fila.length < 8) continue;
+        for(let i = 1; i < filas.length; i++) {
+            let fila = filas[i];
+            // Si solo nos interesan los datos básicos, quitamos la restricción de < 8
+            if(fila.length < 3) continue;
 
-                    let fecha = fila[0];      
-                    let hora = fila[1];       
-                    let equipo1 = fila[2];    
-                    let bandera1 = fila[3].replace(/"/g, "");  
-                    let goles1 = fila[4];     
-                    let goles2 = fila[5];     
-                    let equipo2 = fila[6];    
-                    let bandera2 = fila[7].replace(/"/g, "");  
+            let fecha = fila[0];      
+            let hora = fila[1];       
+            let equipo1 = fila[2];    
+            let goles1 = fila[4];     
+            let goles2 = fila[5];     
+            let equipo2 = fila[6];    
 
-                    let marcador = (goles1 !== "" && goles2 !== "") ? `${goles1} - ${goles2}` : "vs";
+            let marcador = (goles1 !== "" && goles2 !== "") ? `${goles1} - ${goles2}` : "vs";
 
-                    // Acumulando para pestaña "Calendario Total"
-                    htmlCalendarioTotal += `
-                        <div class="match-day-box" style="border-left-color: var(--border);">
-                            <span class="match-time">📅 Fecha: ${fecha} | ⏰ Hora: ${hora} h</span>
-                            <div class="partido-fila-completa">
-                                <div class="bloque-equipo izq">
-                                    <span class="banderita">${banderitaFiltro(bandera1)}</span>
-                                    <span>${equipo1}</span>
-                                </div>
-                                <div class="score-box" style="background:rgba(0,0,0,0.2); color:#fff;">${marcador}</div>
-                                <div class="bloque-equipo der">
-                                    <span>${equipo2}</span>
-                                    <span class="banderita">${banderitaFiltro(bandera2)}</span>
-                                </div>
+            // HTML Calendario Total sin banderas
+            htmlCalendarioTotal += `
+                <div class="match-day-box" style="border-left-color: var(--border);">
+                    <span class="match-time">📅 Fecha: ${fecha} | ⏰ Hora: ${hora} h</span>
+                    <div class="partido-fila-completa">
+                        <div class="bloque-equipo izq">
+                            <span>${equipo1}</span>
+                        </div>
+                        <div class="score-box" style="background:rgba(0,0,0,0.2); color:#fff;">${marcador}</div>
+                        <div class="bloque-equipo der">
+                            <span>${equipo2}</span>
+                        </div>
+                    </div>
+                </div>`;
+
+            // HTML Partidos de hoy sin banderas
+            if(fecha === fechaHoy) {
+                countHoy++;
+                htmlHoy += `
+                    <div class="match-day-box">
+                        <span class="match-time">⏰ Hora del Partido: ${hora} h</span>
+                        <div class="partido-fila-completa">
+                            <div class="bloque-equipo izq">
+                                <span>${equipo1}</span>
                             </div>
-                        </div>`;
+                            <div class="score-box">${marcador}</div>
+                            <div class="bloque-equipo der">
+                                <span>${equipo2}</span>
+                            </div>
+                        </div>
+                    </div>`;
+            }
+        }
 
-                    // Filtrando para pestaña "Partidos de Hoy"
-                    if(fecha === fechaHoy) {
-                        countHoy++;
-                        htmlHoy += `
-                            <div class="match-day-box">
-                                <span class="match-time">⏰ Hora del Partido: ${hora} h</span>
-                                <div class="partido-fila-completa">
-                                    <div class="bloque-equipo izq">
-                                        <span class="banderita">${banderitaFiltro(bandera1)}</span>
-                                        <span>${equipo1}</span>
-                                    </div>
-                                    <div class="score-box">${marcador}</div>
-                                    <div class="bloque-equipo der">
-                                        <span>${equipo2}</span>
-                                        <span class="banderita">${banderitaFiltro(bandera2)}</span>
-                                    </div>
-                                </div>
-                            </div>`;
-                    }
-                }
+        if(countHoy === 0) {
+            document.getElementById('lista-hoy').innerHTML = `<p style="text-align:center;color:var(--text-muted); padding: 20px;">No hay más partidos programados para hoy (${fechaHoy}).</p>`;
+        } else {
+            document.getElementById('lista-hoy').innerHTML = htmlHoy;
+        }
+        document.getElementById('load-hoy').style.display = 'none';
+
+        document.getElementById('lista-calendario-total').innerHTML = htmlCalendarioTotal;
+        document.getElementById('load-calendario').style.display = 'none';
+
+    } catch(e) {
+        console.error(e);
+        document.getElementById('load-hoy').innerText = "⚠️ Error al procesar partidos.";
+        document.getElementById('load-calendario').innerText = "⚠️ Error al procesar el calendario.";
+    }
+}
 
                 if(countHoy === 0) {
                     document.getElementById('lista-hoy').innerHTML = `<p style="text-align:center;color:var(--text-muted); padding: 20px;">No hay más partidos programados en el cuadrante para la jornada de hoy (${fechaHoy}).</p>`;
