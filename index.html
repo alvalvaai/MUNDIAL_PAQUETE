@@ -158,6 +158,7 @@
         <button id="btn-calendario" class="tab-btn" onclick="cambiarVista('calendario-completo')">🗓️ Calendario Total</button>
         <button id="btn-pronosticos" class="tab-btn" onclick="cambiarVista('pronosticos')">📝 Pronósticos</button>
         <button id="btn-resumen" class="tab-btn" onclick="cambiarVista('resumen-ia')">🎙️ Resumen Diario</button>
+        <button id="btn-info" class="tab-btn" onclick="cambiarVista('info-noticias')">ℹ️ Info</button>    
     </div>
 
     <div class="container">
@@ -222,6 +223,13 @@
                 <div id="texto-resumen-ia" class="resumen-container" style="display:none;"></div>
             </div>
         </div>
+           <div id="info-noticias" class="vista">
+        <div class="wrapper-tabla">
+            <h2>ℹ️ Reglas y Noticias</h2>
+            <div id="load-info" class="loading">Cargando información...</div>
+            <div id="texto-info" class="resumen-container" style="display:none; white-space: pre-line;"></div>
+        </div>
+    </div>
     </div>
 
     <script>
@@ -229,6 +237,7 @@
         const URL_CSV_COPA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=1380530497&single=true&output=csv";
         const URL_CSV_PRONOSTICOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=39491990&single=true&output=csv";
         const URL_CSV_RESUMEN = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=1115447444&single=true&output=csv";
+        const URL_CSV_INFO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=1253131676&single=true&output=csv";
         
         // ⚠️ ENLACE A TU NUEVA PESTAÑA "Resul_Ban!" DE GOOGLE SHEETS
         const URL_CSV_RESUL_BAN = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=9958161&single=true&output=csv";
@@ -265,6 +274,7 @@
             if(idVista === 'calendario-completo') document.getElementById('btn-calendario').classList.add('active');
             if(idVista === 'pronosticos') document.getElementById('btn-pronosticos').classList.add('active');
             if(idVista === 'resumen-ia') document.getElementById('btn-resumen').classList.add('active');
+            if(idVista === 'info-noticias') document.getElementById('btn-info').classList.add('active');
         }
 
         // Control dinámico de zona horaria con límite de jornada a las 08:00 AM
@@ -702,15 +712,34 @@
             }
         }
 
+  //NUEVA FUNCION INFO
+        async function cargarInfo() {
+    try {
+        let res = await fetch(URL_CSV_INFO);
+        let text = await res.text();
+        let filas = parsearCSV(text);
+        
+        // Unimos todas las celdas en un solo bloque de texto
+        let contenido = filas.map(fila => fila.join(" ")).join("<br>");
+        
+        document.getElementById('texto-info').innerHTML = contenido;
+        document.getElementById('texto-info').style.display = 'block';
+        document.getElementById('load-info').style.display = 'none';
+    } catch(e) {
+        document.getElementById('load-info').innerText = "⚠️ Error al cargar la info.";
+    }
+}   
+        
        window.onload = function() {
     // Protección individual para cada función
     const funciones = [
-        { nombre: "Resumen", fn: cargarResumenDiario },
-        { nombre: "Clasificación", fn: cargarClasificacion },
-        { nombre: "Copa", fn: cargarCopa },
-        { nombre: "Pronósticos", fn: cargarPronosticos },
-        { nombre: "Partidos", fn: cargarPartidosYCalendario } // <--- ¡AÑADE ESTA LÍNEA!
-    ];
+    { nombre: "Resumen", fn: cargarResumenDiario },
+    { nombre: "Clasificación", fn: cargarClasificacion },
+    { nombre: "Copa", fn: cargarCopa },
+    { nombre: "Pronósticos", fn: cargarPronosticos },
+    { nombre: "Partidos", fn: cargarPartidosYCalendario },
+    { nombre: "Info", fn: cargarInfo } // <--- Nueva función aquí
+];
 
     funciones.forEach(item => {
         try {
