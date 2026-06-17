@@ -720,7 +720,7 @@
         let filas = parsearCSV(text);
         
         // Unimos todas las celdas en un solo bloque de texto
-        let contenido = filas.map(fila => fila.join(" ")).join("<br>");
+        let contenido = filas.map(fila => fila.join(" ")).join("\n\n");
         
         document.getElementById('texto-info').innerHTML = contenido;
         document.getElementById('texto-info').style.display = 'block';
