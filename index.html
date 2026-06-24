@@ -204,11 +204,17 @@
         </div>
 
         <div id="pronosticos" class="vista">
-            <div class="wrapper-tabla">
-                <h2>Predicciones de los Participantes</h2>
-                <div id="load-pronosticos" class="loading">Cargando pronósticos de la porra...</div>
-                <div style="overflow-x: auto; max-height: 600px; border-radius: 8px;-webkit-overflow-scrolling: touch;">
-                    <table id="tabla-pronosticos" class="tabla-porra" style="display:none;">
+    <div class="wrapper-tabla">
+        <h2>Predicciones de los Participantes</h2>
+        <div id="load-pronosticos" class="loading">Cargando pronósticos de la porra...</div>
+        
+        <div style="margin-bottom: 10px;">
+            <input type="text" id="buscador-pronosticos" onkeyup="filtrarPronosticos()" 
+                   placeholder="🔍 Buscar concursante..." 
+                   style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); color: white;">
+        </div>
+        <div style="overflow-x: auto; max-height: 600px; border-radius: 8px;">
+            <table id="tabla-pronosticos" class="tabla-porra" style="display:none;">
                         <thead id="header-pronosticos"></thead>
                         <tbody id="body-pronosticos"></tbody>
                     </table>
@@ -640,6 +646,26 @@
             document.getElementById('arbol-contenedor').innerHTML = html;
         }
 
+function filtrarPronosticos() {
+            let input = document.getElementById("buscador-pronosticos");
+            let filtro = input.value.toUpperCase();
+            let tabla = document.getElementById("tabla-pronosticos");
+            let filas = tabla.getElementsByTagName("tr");
+
+            // Empezamos desde 1 para saltarnos la fila del encabezado (th)
+            for (let i = 1; i < filas.length; i++) {
+                let celdaJugador = filas[i].getElementsByTagName("td")[0]; 
+                if (celdaJugador) {
+                    let texto = celdaJugador.textContent || celdaJugador.innerText;
+                    if (texto.toUpperCase().indexOf(filtro) > -1) {
+                        filas[i].style.display = "";
+                    } else {
+                        filas[i].style.display = "none";
+                    }
+                }
+            }
+        }
+        
         async function cargarPronosticos() {
             try {
                 let res = await fetch(URL_CSV_PRONOSTICOS);
