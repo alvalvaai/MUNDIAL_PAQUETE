@@ -788,16 +788,22 @@ function filtrarPronosticos() {
     });
 };
         fetch(URL_CSV_REGLAMENTO)
-        .then(response => response.text())
-        .then(csvText => {
-            const datos = parsearCSV(csvText);
-            const contenedor = document.getElementById("texto-reglamento");
-            // Une todas las filas con saltos de línea para respetar el formato del Excel
-            contenedor.innerText = datos.map(fila => fila.join(" ")).join("\n");
-            contenedor.style.display = "block";
-            document.getElementById("load-reglamento").style.display = "none";
-        })
-        .catch(err => console.error("Error cargando el reglamento:", err));
+    .then(response => response.text())
+    .then(csvText => {
+        const datos = parsearCSV(csvText);
+        const contenedor = document.getElementById("texto-reglamento");
+        
+        // Convertimos el texto:
+        // 1. Unimos las filas con saltos de línea <br>
+        // 2. Usamos replace para detectar texto entre asteriscos **texto** y ponerlo en <b>
+        let htmlFinal = datos.map(fila => fila.join(" ")).join("<br><br>");
+        htmlFinal = htmlFinal.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        
+        contenedor.innerHTML = htmlFinal; // Usamos innerHTML para que lea el formato
+        contenedor.style.display = "block";
+        document.getElementById("load-reglamento").style.display = "none";
+    })
+    .catch(err => console.error("Error cargando el reglamento:", err));
         
     </script>
     <div class="vista" style="margin-top: 30px; display: block !important;">
