@@ -315,8 +315,7 @@
             return `${dia}/${mes}`;
         }
 
-       // Función para cargar Paquetísimos
-// Función para cargar Paquetísimos en formato de columnas (como Cruces)
+      // Función para cargar Paquetísimos en formato de columnas
 fetch(URL_CSV_PAQUETISIMOS)
     .then(response => response.text())
     .then(csvText => {
@@ -324,7 +323,6 @@ fetch(URL_CSV_PAQUETISIMOS)
         const contenedor = document.getElementById("arbol-paquetisimos");
         contenedor.innerHTML = ""; // Limpiar carga previa
         
-        // Fases en orden para crear las columnas
         const ordenRondas = ["1/8 F", "1/4 F", "1/2 F", "FINAL"];
         
         ordenRondas.forEach(faseActual => {
@@ -336,7 +334,7 @@ fetch(URL_CSV_PAQUETISIMOS)
             // Filtramos las filas que pertenecen a esta fase
             const partidosFase = filas.filter(f => f[0] === faseActual);
             
-           partidosFase.forEach(fila => {
+            partidosFase.forEach(fila => {
                 // fila[1] = Equipo 1, fila[2] = Equipo 2
                 // fila[3] = Gol 1 (Columna D), fila[4] = Gol 2 (Columna E)
                 const eq1 = fila[1];
@@ -347,8 +345,8 @@ fetch(URL_CSV_PAQUETISIMOS)
                 const card = document.createElement("div");
                 card.className = "cruce-card";
                 
-                // Si gol1 y gol2 existen, los muestra; si no, muestra el guion "-"
-                const resultado = (gol1 !== "" && gol2 !== "") ? `${gol1} - ${gol2}` : "-";
+                // Si gol1 y gol2 tienen contenido, los muestra; si no, muestra el guion "-"
+                const resultado = (gol1 !== undefined && gol1 !== "" && gol2 !== undefined && gol2 !== "") ? `${gol1} - ${gol2}` : "-";
 
                 card.innerHTML = `
                     <div class="partido-fila">
@@ -357,16 +355,16 @@ fetch(URL_CSV_PAQUETISIMOS)
                         <span class="team re">${eq2 || ''}</span>
                     </div>
                 `;
-                col.appendChild(columnaPartidos); // Esto es solo un ejemplo de estructura
-                col.appendChild(card);
+                col.appendChild(card); // Eliminamos la variable inexistente columnaPartidos
             });
+            contenedor.appendChild(col);
+        });
         document.getElementById("load-paquetisimos").style.display = "none";
     })
     .catch(err => {
         console.error("Error cargando Paquetísimos:", err);
         document.getElementById("load-paquetisimos").innerText = "Error al cargar los datos.";
     });
-        
         
         function banderitaFiltro(textoBandera) {
             if(!textoBandera || textoBandera.includes("BUSCARV") || textoBandera.trim() === "") {
