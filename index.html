@@ -321,24 +321,32 @@ fetch(URL_CSV_PAQUETISIMOS)
     .then(csvText => {
         const filas = parsearCSV(csvText);
         const contenedor = document.getElementById("arbol-paquetisimos");
-        contenedor.innerHTML = ""; // Limpiar
+        contenedor.innerHTML = ""; // Limpiar carga previa
         
         filas.forEach(fila => {
-            if (fila.length < 5) return;
+            // Ajuste: si la fila solo tiene fase y equipos (3 elementos), que también funcione
+            if (fila.length < 3) return; 
+            
             const [fase, eq1, eq2, gol1, gol2] = fila;
             const card = document.createElement("div");
             card.className = "cruce-card";
+            
+            // Usamos gol1 || '' para que no salga "undefined" si está vacío
             card.innerHTML = `
                 <span class="cruce-info-tag">${fase}</span>
                 <div class="partido-fila">
                     <span class="team">${eq1}</span>
-                    <span class="score">${gol1 || '-'} - ${gol2 || '-'}</span>
+                    <span class="score">${(gol1 !== undefined && gol1 !== "") ? gol1 : '-'} - ${(gol2 !== undefined && gol2 !== "") ? gol2 : '-'}</span>
                     <span class="team re">${eq2}</span>
                 </div>
             `;
             contenedor.appendChild(card);
         });
         document.getElementById("load-paquetisimos").style.display = "none";
+    })
+    .catch(err => {
+        console.error("Error cargando Paquetísimos:", err);
+        document.getElementById("load-paquetisimos").innerText = "Error al cargar los datos. Verifica que la pestaña esté publicada.";
     });
         
         
