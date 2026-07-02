@@ -336,21 +336,30 @@ fetch(URL_CSV_PAQUETISIMOS)
             // Filtramos las filas que pertenecen a esta fase
             const partidosFase = filas.filter(f => f[0] === faseActual);
             
-            partidosFase.forEach(fila => {
-                // fila[0]=Fase, fila[1]=Equipo1, fila[2]=Equipo2
+           partidosFase.forEach(fila => {
+                // fila[1] = Equipo 1, fila[2] = Equipo 2
+                // fila[3] = Gol 1 (Columna D), fila[4] = Gol 2 (Columna E)
+                const eq1 = fila[1];
+                const eq2 = fila[2];
+                const gol1 = fila[3]; 
+                const gol2 = fila[4];
+
                 const card = document.createElement("div");
                 card.className = "cruce-card";
+                
+                // Si gol1 y gol2 existen, los muestra; si no, muestra el guion "-"
+                const resultado = (gol1 !== "" && gol2 !== "") ? `${gol1} - ${gol2}` : "-";
+
                 card.innerHTML = `
                     <div class="partido-fila">
-                        <span class="team">${fila[1] || ''}</span>
-                        <span class="score">-</span>
-                        <span class="team re">${fila[2] || ''}</span>
+                        <span class="team">${eq1 || ''}</span>
+                        <span class="score">${resultado}</span>
+                        <span class="team re">${eq2 || ''}</span>
                     </div>
                 `;
+                col.appendChild(columnaPartidos); // Esto es solo un ejemplo de estructura
                 col.appendChild(card);
             });
-            contenedor.appendChild(col);
-        });
         document.getElementById("load-paquetisimos").style.display = "none";
     })
     .catch(err => {
