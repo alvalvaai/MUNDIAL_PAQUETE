@@ -152,9 +152,10 @@
 
     <div class="tabs">
         <button id="btn-clasificacion" class="tab-btn active" onclick="cambiarVista('clasificacion')">📊 Clasificación</button>
-        <button id="btn-copa" class="tab-btn" onclick="cambiarVista('fase-copa')">⚔️ Copa</button>
         <button id="btn-cruces" class="tab-btn" onclick="cambiarVista('fases-finales')">🌳 Cruces</button>
+        <button id="btn-paquetisimos" class="tab-btn" onclick="cambiarVista('vista-paquetisimos')">🎁 Paquetísimos</button>
         <button id="btn-hoy" class="tab-btn" onclick="cambiarVista('partidos-hoy')">📅 Partidos de Hoy</button>
+        <button id="btn-copa" class="tab-btn" onclick="cambiarVista('fase-copa')">⚔️ Copa</button>
         <button id="btn-calendario" class="tab-btn" onclick="cambiarVista('calendario-completo')">🗓️ Calendario Total</button>
         <button id="btn-pronosticos" class="tab-btn" onclick="cambiarVista('pronosticos')">📝 Pronósticos</button>
         <button id="btn-resumen" class="tab-btn" onclick="cambiarVista('resumen-ia')">🎙️ Resumen Diario</button>
@@ -188,6 +189,14 @@
             </div>
         </div>
 
+<div id="vista-paquetisimos" class="vista">
+    <div class="wrapper-tabla">
+        <h2>🎁 Cuadro "Paquetísimos"</h2>
+        <div id="load-paquetisimos" class="loading">Cargando cuadro de eliminatorias...</div>
+        <div id="arbol-paquetisimos" class="arbol-cruces"></div>
+    </div>
+</div>
+        
         <div id="partidos-hoy" class="vista">
             <div class="wrapper-tabla">
                 <h2 id="titulo-hoy">Partidos de la Jornada</h2>
@@ -253,8 +262,8 @@
         const URL_CSV_RESUMEN = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=1115447444&single=true&output=csv";
         const URL_CSV_REGLAMENTO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=2145481895&single=true&output=csv";
         const URL_CSV_INFO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=1253131676&single=true&output=csv";
+        const URL_CSV_PAQUETISIMOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=1418538523&single=true&output=csv";
         
-        // ⚠️ ENLACE A TU NUEVA PESTAÑA "Resul_Ban!" DE GOOGLE SHEETS
         const URL_CSV_RESUL_BAN = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=9958161&single=true&output=csv";
 
         let gruposGlobalesMapeados = {};
@@ -291,6 +300,7 @@
             if(idVista === 'resumen-ia') document.getElementById('btn-resumen').classList.add('active');
             if(idVista === 'info-noticias') document.getElementById('btn-info').classList.add('active');
             if(idVista === 'vista-reglamento') document.getElementById('btn-reglamento').classList.add('active');
+            if(idVista === 'vista-paquetisimos') document.getElementById('btn-paquetisimos').classList.add('active');
         }
 
         // Control dinámico de zona horaria con límite de jornada a las 08:00 AM
@@ -305,6 +315,33 @@
             return `${dia}/${mes}`;
         }
 
+       // Función para cargar Paquetísimos
+fetch(URL_CSV_PAQUETISIMOS)
+    .then(response => response.text())
+    .then(csvText => {
+        const filas = parsearCSV(csvText);
+        const contenedor = document.getElementById("arbol-paquetisimos");
+        contenedor.innerHTML = ""; // Limpiar
+        
+        filas.forEach(fila => {
+            if (fila.length < 5) return;
+            const [fase, eq1, eq2, gol1, gol2] = fila;
+            const card = document.createElement("div");
+            card.className = "cruce-card";
+            card.innerHTML = `
+                <span class="cruce-info-tag">${fase}</span>
+                <div class="partido-fila">
+                    <span class="team">${eq1}</span>
+                    <span class="score">${gol1 || '-'} - ${gol2 || '-'}</span>
+                    <span class="team re">${eq2}</span>
+                </div>
+            `;
+            contenedor.appendChild(card);
+        });
+        document.getElementById("load-paquetisimos").style.display = "none";
+    });
+        
+        
         function banderitaFiltro(textoBandera) {
             if(!textoBandera || textoBandera.includes("BUSCARV") || textoBandera.trim() === "") {
                 return "🏳️"; 
