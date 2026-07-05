@@ -321,31 +321,29 @@ fetch(URL_CSV_PAQUETISIMOS)
     .then(csvText => {
         const filas = parsearCSV(csvText);
         const contenedor = document.getElementById("arbol-paquetisimos");
-        contenedor.innerHTML = ""; // Limpiar carga previa
+        contenedor.innerHTML = "";
         
         const ordenRondas = ["1/8 F", "1/4 F", "1/2 F", "FINAL"];
         
         ordenRondas.forEach(faseActual => {
-            // Creamos la columna
             const col = document.createElement("div");
             col.className = "ronda-columna";
             col.innerHTML = `<div class="ronda-titulo-cruces">${faseActual}</div>`;
             
-            // Filtramos las filas que pertenecen a esta fase
             const partidosFase = filas.filter(f => f[0] === faseActual);
             
             partidosFase.forEach(fila => {
+                // Ahora los datos están en:
                 // fila[1] = Equipo 1, fila[2] = Equipo 2
-                // fila[3] = Gol 1 (Columna D), fila[4] = Gol 2 (Columna E)
+                // fila[4] = Resultado 1 (Columna E), fila[5] = Resultado 2 (Columna F)
                 const eq1 = fila[1];
                 const eq2 = fila[2];
-                const gol1 = fila[3]; 
-                const gol2 = fila[4];
+                const gol1 = fila[4]; 
+                const gol2 = fila[5];
 
                 const card = document.createElement("div");
                 card.className = "cruce-card";
                 
-                // Si gol1 y gol2 tienen contenido, los muestra; si no, muestra el guion "-"
                 const resultado = (gol1 !== undefined && gol1 !== "" && gol2 !== undefined && gol2 !== "") ? `${gol1} - ${gol2}` : "-";
 
                 card.innerHTML = `
@@ -355,7 +353,7 @@ fetch(URL_CSV_PAQUETISIMOS)
                         <span class="team re">${eq2 || ''}</span>
                     </div>
                 `;
-                col.appendChild(card); // Eliminamos la variable inexistente columnaPartidos
+                col.appendChild(card);
             });
             contenedor.appendChild(col);
         });
