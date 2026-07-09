@@ -158,6 +158,7 @@
         <button id="btn-copa" class="tab-btn" onclick="cambiarVista('fase-copa')">⚔️ Copa</button>
         <button id="btn-calendario" class="tab-btn" onclick="cambiarVista('calendario-completo')">🗓️ Calendario Total</button>
         <button id="btn-pronosticos" class="tab-btn" onclick="cambiarVista('pronosticos')">📝 Pronósticos</button>
+        <button id="btn-bonus" class="tab-btn" onclick="cambiarVista('vista-bonus')">⭐ Bonus</button>
         <button id="btn-resumen" class="tab-btn" onclick="cambiarVista('resumen-ia')">🎙️ Resumen Diario</button>
         <button id="btn-reglamento" class="tab-btn" onclick="cambiarVista('vista-reglamento')">📜 Reglamento</button>
         <button id="btn-info" class="tab-btn" onclick="cambiarVista('info-noticias')">ℹ️ Info</button>    
@@ -232,6 +233,24 @@
             </div>
         </div>
 
+        <div id="vista-bonus" class="vista">
+            <div class="wrapper-tabla">
+                <h2>⭐ Predicciones Bonus (Semifinalistas 2 Ptos · Finalistas 3 Ptos · Campeón 4 Ptos)</h2>
+                <div id="load-bonus" class="loading">Cargando predicciones bonus...</div>
+                <div style="margin-bottom: 10px;">
+                    <input type="text" id="buscador-bonus" onkeyup="filtrarBonus()" 
+                           placeholder="🔍 Buscar concursante..." 
+                           style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); color: white;">
+                </div>
+                <div style="overflow-x: auto; max-height: 600px; border-radius: 8px;">
+                    <table id="tabla-bonus" class="tabla-porra" style="display:none;">
+                        <thead id="header-bonus"></thead>
+                        <tbody id="body-bonus"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <div id="resumen-ia" class="vista">
             <div class="wrapper-tabla">
                 <h2>🎙️ El Micrófono de la IA - Crónica Diaria</h2>
@@ -263,6 +282,7 @@
         const URL_CSV_REGLAMENTO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=2145481895&single=true&output=csv";
         const URL_CSV_INFO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=1253131676&single=true&output=csv";
         const URL_CSV_PAQUETISIMOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=1418538523&single=true&output=csv";
+        const URL_CSV_BONUS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=1997817732&single=true&output=csv";
         
         const URL_CSV_RESUL_BAN = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=9958161&single=true&output=csv";
 
@@ -297,6 +317,7 @@
             if(idVista === 'partidos-hoy') document.getElementById('btn-hoy').classList.add('active');
             if(idVista === 'calendario-completo') document.getElementById('btn-calendario').classList.add('active');
             if(idVista === 'pronosticos') document.getElementById('btn-pronosticos').classList.add('active');
+            if(idVista === 'vista-bonus') document.getElementById('btn-bonus').classList.add('active');
             if(idVista === 'resumen-ia') document.getElementById('btn-resumen').classList.add('active');
             if(idVista === 'info-noticias') document.getElementById('btn-info').classList.add('active');
             if(idVista === 'vista-reglamento') document.getElementById('btn-reglamento').classList.add('active');
@@ -738,6 +759,25 @@ function filtrarPronosticos() {
                 }
             }
         }
+
+        function filtrarBonus() {
+            let input = document.getElementById("buscador-bonus");
+            let filtro = input.value.toUpperCase();
+            let tabla = document.getElementById("tabla-bonus");
+            let filas = tabla.getElementsByTagName("tr");
+
+            for (let i = 1; i < filas.length; i++) {
+                let celdaJugador = filas[i].getElementsByTagName("td")[0];
+                if (celdaJugador) {
+                    let texto = celdaJugador.textContent || celdaJugador.innerText;
+                    if (texto.toUpperCase().indexOf(filtro) > -1) {
+                        filas[i].style.display = "";
+                    } else {
+                        filas[i].style.display = "none";
+                    }
+                }
+            }
+        }
         
         async function cargarPronosticos() {
             try {
@@ -768,6 +808,60 @@ function filtrarPronosticos() {
                 document.getElementById('load-pronosticos').style.display = 'none';
                 document.getElementById('tabla-pronosticos').style.display = 'table';
             } catch(e) { console.error(e); document.getElementById('load-pronosticos').innerText = "⚠️ Error al conectar con Pronósticos."; }
+        }
+
+        // NUEVA FUNCIÓN PARA CARGAR LA PESTAÑA BONUS (Semifinalistas / Final / Campeón)
+        async function cargarBonus() {
+            try {
+                let res = await fetch(URL_CSV_BONUS);
+                let text = await res.text();
+                let filas = parsearCSV(text);
+                if(filas.length < 2) return;
+
+                // La fila 0 son los títulos combinados (SEMIFINALISTAS 2 PTOS / FINAL 3 PTOS / CAMPEON 4 PTOS)
+                // Construimos nuestra propia cabecera de columnas individuales
+                document.getElementById('header-bonus').innerHTML = `
+                    <tr>
+                        <th class="jugador-header">Jugador</th>
+                        <th>Semi 1</th><th>Semi 2</th><th>Semi 3</th><th>Semi 4</th>
+                        <th>Finalista 1</th><th>Finalista 2</th>
+                        <th>Campeón</th>
+                    </tr>`;
+
+                let bodyHTML = "";
+                for(let i = 1; i < filas.length; i++) {
+                    let fila = filas[i];
+                    if(!fila[0] || fila[0].trim() === "") continue;
+
+                    let jugador = fila[0];
+                    // B,C,D,E = Semifinalistas (idx 1-4)
+                    let semi1 = fila[1] || "-", semi2 = fila[2] || "-", semi3 = fila[3] || "-", semi4 = fila[4] || "-";
+                    // F (idx 5) es columna vacía separadora -> se salta
+                    // G,H = Finalistas (idx 6-7)
+                    let final1 = fila[6] || "-", final2 = fila[7] || "-";
+                    // I (idx 8) es columna vacía separadora -> se salta
+                    // J = Campeón (idx 9)
+                    let campeon = fila[9] || "-";
+
+                    bodyHTML += `
+                        <tr>
+                            <td class="jugador-celda">${jugador}</td>
+                            <td class="celda-pronostico">${semi1}</td>
+                            <td class="celda-pronostico">${semi2}</td>
+                            <td class="celda-pronostico">${semi3}</td>
+                            <td class="celda-pronostico">${semi4}</td>
+                            <td class="celda-pronostico" style="background: rgba(20,184,166,0.18);">${final1}</td>
+                            <td class="celda-pronostico" style="background: rgba(20,184,166,0.18);">${final2}</td>
+                            <td class="celda-total">${campeon}</td>
+                        </tr>`;
+                }
+                document.getElementById('body-bonus').innerHTML = bodyHTML;
+                document.getElementById('load-bonus').style.display = 'none';
+                document.getElementById('tabla-bonus').style.display = 'table';
+            } catch(e) {
+                console.error(e);
+                document.getElementById('load-bonus').innerText = "⚠️ Error al conectar con Bonus.";
+            }
         }
 
         // NUEVA FUNCIÓN PARA CARGAR EL RESUMEN GENERADO POR LA IA (VERSIÓN DEFINITIVA)
@@ -836,6 +930,7 @@ function filtrarPronosticos() {
     { nombre: "Clasificación", fn: cargarClasificacion },
     { nombre: "Copa", fn: cargarCopa },
     { nombre: "Pronósticos", fn: cargarPronosticos },
+    { nombre: "Bonus", fn: cargarBonus },
     { nombre: "Partidos", fn: cargarPartidosYCalendario },
     { nombre: "Info", fn: cargarInfo } // <--- Nueva función aquí
 ];
