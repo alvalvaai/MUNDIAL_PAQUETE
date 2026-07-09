@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 MUNDIAL PAQUETE 2026</title>
+    <style>
+        :root {
+            --bg-color: #05220f; 
+            --card-bg: #0b3a1a; 
+            --accent: #facc15; 
+            --text: #ffffff;
+            --text-muted: #a7f3d0; 
+            --border: #14b8a6; 
+            --button-active: #eab308; 
+            --grid-bg: #114e26;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            background-image: linear-gradient(135deg, #05220f 25%, #021207 100%);
+            color: var(--text);
+            margin: 0;
+            padding: 10px;
+        }
+
+        @media(min-width: 768px) { body { padding: 20px; } }
+
+        header { 
+            text-align: center; margin-bottom: 25px; background: rgba(0, 0, 0, 0.3);
+            padding: 15px; border-radius: 16px; border: 2px solid var(--accent);
+        }
+        h1 { color: var(--accent); margin-bottom: 5px; font-size: 1.8rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.6); }
+        @media(min-width: 768px) { h1 { font-size: 2.2rem; } }
+
+        .tabs { display: flex; justify-content: center; gap: 8px; margin-bottom: 25px; flex-wrap: wrap; }
+        .tab-btn {
+            background-color: var(--card-bg); color: var(--text); border: 2px solid var(--border);
+            padding: 10px 15px; border-radius: 50px; cursor: pointer; font-weight: bold; transition: 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2); font-size: 0.85rem;
+        }
+        .tab-btn.active { background-color: var(--button-active); border-color: var(--accent); color: #000; }
+
+        .container { max-width: 1450px; margin: 0 auto; }
+        .vista { display: none; }
+        .vista.active { display: block; }
+
+        .wrapper-tabla {
+            background-color: var(--card-bg); border-radius: 16px; padding: 12px;
+            border: 2px solid rgba(250, 204, 21, 0.3); box-shadow: 0 8px 16px rgba(0,0,0,0.3); margin-bottom: 25px;
+        }
+        @media(min-width: 768px) { .wrapper-tabla { padding: 20px; } }
+        .wrapper-tabla h2 { color: var(--accent); border-bottom: 3px solid var(--accent); padding-bottom: 8px; margin-top: 0; font-size: 1.4rem;}
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin-bottom: 10px; }
+        th, td { padding: 10px; text-align: left; }
+        th { color: var(--accent); font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid var(--border); }
+        tr:not(:last-child) { border-bottom: 1px solid rgba(255,255,255,0.1); }
+        
+        .pos-destacada { font-weight: bold; color: var(--accent); background: rgba(250, 204, 21, 0.1); padding: 4px 8px; border-radius: 6px; }
+
+        /* REJILLA DE GRUPOS DE LA COPA  */
+        .grid-grupos { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 15px; margin-top: 15px; }
+        .grupo-box { background-color: var(--grid-bg); border: 2px solid #166534; border-radius: 14px; padding: 12px; box-shadow: 0 6px 12px rgba(0,0,0,0.2); }
+        .grupo-box h3 { color: var(--accent); margin-top: 0; margin-bottom: 10px; border-bottom: 2px solid var(--accent); padding-bottom: 4px; font-size: 1.2rem; }
+
+        .mini-tabla { font-size: 0.8rem; margin-bottom: 15px; }
+        .mini-tabla th { padding: 4px; font-size: 0.75rem; }
+        .mini-tabla td { padding: 5px 4px; }
+        .txt-pts { font-weight: bold; color: var(--accent); }
+
+        .jornada-titulo {
+            font-size: 0.75rem; color: var(--accent); text-align: center; font-weight: bold;
+            background: rgba(0,0,0,0.3); padding: 3px; margin-top: 10px; margin-bottom: 8px;
+            text-transform: uppercase; border-radius: 4px; letter-spacing: 1px;
+        }
+        .partido-fila { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .partido-fila .team { width: 42%; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .partido-fila .team.re { text-align: right; }
+        .partido-fila .score {
+            width: 16%; text-align: center; background: rgba(0,0,0,0.4); color: var(--accent); font-weight: bold; border-radius: 5px; padding: 2px 0; font-size: 0.85rem;
+        }
+
+        /* NUEVOS ESTILOS PARA LAS TARJETAS DE PARTIDOS (HOY Y CALENDARIO) */
+        .match-day-box { background: var(--grid-bg); padding: 14px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid var(--accent); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .match-time { font-size: 0.85rem; color: var(--accent); font-weight: bold; display: block; margin-bottom: 6px;}
+        .partido-fila-completa { display: flex; justify-content: space-between; align-items: center; font-size: 1rem; }
+        .bloque-equipo { width: 40%; display: flex; align-items: center; gap: 8px; font-weight: 500; }
+        .bloque-equipo.izq { justify-content: flex-start; }
+        .bloque-equipo.der { justify-content: flex-end; text-align: right; }
+        .banderita { font-size: 1.3rem; }
+        .score-box {
+            width: 16%; text-align: center; background: rgba(0,0,0,0.5); color: var(--accent); font-weight: bold; border-radius: 6px; padding: 6px 0; font-size: 1rem; border: 1px solid rgba(20, 184, 166, 0.3);
+        }
+
+        /* ARBOL DE ELIMINATORIAS */
+        .arbol-cruces { display: flex; gap: 15px; overflow-x: auto; padding: 15px 5px; align-items: center; }
+        .ronda-columna { display: flex; flex-direction: column; justify-content: space-around; min-width: 230px; height: 100%; }
+        .ronda-titulo-cruces {
+            text-align: center; color: var(--accent); font-weight: bold; text-transform: uppercase; font-size: 0.85rem; background: rgba(0, 0, 0, 0.4); padding: 6px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border);
+        }
+        .cruce-card {
+            background: var(--grid-bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px; margin: 10px 0; box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .cruce-info-tag {
+            font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 2px;
+        }
+
+        /* TABLA DE PRONÓSTICOS CON BORDES CLAROS PARA MÓVIL */
+        .tabla-porra { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .tabla-porra th {
+            background-color: #072a13; color: var(--accent); font-size: 0.7rem; text-align: center; padding: 6px 4px; border-bottom: 2px solid var(--border);
+            border-left: 1px solid rgba(20, 184, 166, 0.4); border-right: 1px solid rgba(20, 184, 166, 0.4); white-space: nowrap;
+        }
+        .tabla-porra th.jugador-header { text-align: left; position: sticky; left: 0; background-color: #072a13; z-index: 3; padding-left: 10px; font-size: 0.85rem; border-left: none; }
+        .tabla-porra td { padding: 6px 4px; text-align: center; font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.08); border-left: 1px solid rgba(20, 184, 166, 0.4); border-right: 1px solid rgba(20, 184, 166, 0.4); }
+        .tabla-porra td.jugador-celda {
+            text-align: left; font-weight: bold; position: sticky; left: 0; background-color: var(--card-bg); z-index: 2; box-shadow: 3px 0 6px rgba(0,0,0,0.4); padding-left: 10px; white-space: nowrap; color: #e2e8f0; border-left: none;
+        }
+        .tabla-porra tr:hover td { background-color: rgba(20, 184, 166, 0.12); }
+        .tabla-porra tr:hover td.jugador-celda { background-color: #0e4420; }
+        .celda-pronostico { font-family: 'Courier New', Courier, monospace; font-weight: bold; color: var(--accent); background: rgba(0, 0, 0, 0.2); min-width: 38px; letter-spacing: 0.5px; }
+        .celda-total { font-weight: bold; color: #fff; background-color: rgba(234, 179, 8, 0.25) !important; }
+
+        /* DISEÑO DE LA CONTENEDOR DEL RESUMEN DE LA IA */
+        .resumen-container {
+            background-color: #03190b;
+            border-left: 5px solid var(--accent);
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #ffffff;
+            max-width: 850px;
+            margin: 20px auto;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+            border-top: 1px solid rgba(250, 204, 21, 0.1);
+            border-right: 1px solid rgba(250, 204, 21, 0.1);
+            border-bottom: 1px solid rgba(250, 204, 21, 0.1);
+        }
+
+        .loading { text-align: center; font-size: 1.2rem; color: var(--accent); padding: 40px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🏆 MUNDIAL PAQUETE 2026 ⚽</h1>
+        <p style="color: var(--text-muted); font-weight: bold; margin: 0; font-size: 0.85rem;">Resultados En Vivo y Clasificaciones Automatizadas</p>
+    </header>
+
+    <div class="tabs">
+        <button id="btn-clasificacion" class="tab-btn active" onclick="cambiarVista('clasificacion')">📊 Clasificación</button>
+        <button id="btn-cruces" class="tab-btn" onclick="cambiarVista('fases-finales')">🌳 Cruces</button>
+        <button id="btn-paquetisimos" class="tab-btn" onclick="cambiarVista('vista-paquetisimos')">🎁 Paquetísimos</button>
+        <button id="btn-hoy" class="tab-btn" onclick="cambiarVista('partidos-hoy')">📅 Partidos de Hoy</button>
+        <button id="btn-copa" class="tab-btn" onclick="cambiarVista('fase-copa')">⚔️ Copa</button>
+        <button id="btn-calendario" class="tab-btn" onclick="cambiarVista('calendario-completo')">🗓️ Calendario Total</button>
+        <button id="btn-pronosticos" class="tab-btn" onclick="cambiarVista('pronosticos')">📝 Pronósticos</button>
+        <button id="btn-bonus" class="tab-btn" onclick="cambiarVista('vista-bonus')">⭐ Bonus</button>
+        <button id="btn-resumen" class="tab-btn" onclick="cambiarVista('resumen-ia')">🎙️ Resumen Diario</button>
+        <button id="btn-reglamento" class="tab-btn" onclick="cambiarVista('vista-reglamento')">📜 Reglamento</button>
+        <button id="btn-info" class="tab-btn" onclick="cambiarVista('info-noticias')">ℹ️ Info</button>    
+    </div>
+
+    <div class="container">
+        <div id="clasificacion" class="vista active">
+            <div class="wrapper-tabla" style="overflow-x: auto;">
+                <h2>Tabla de Posiciones de la Liga</h2>
+                <div id="load-clasificacion" class="loading">Cargando clasificación desde Google Sheets...</div>
+                <table id="tabla-clasificacion" style="display:none;">
+                    <thead id="header-clasificacion"></thead>
+                    <tbody id="body-clasificacion"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="fase-copa" class="vista">
+            <div id="load-copa" class="loading">Cargando Fase de Grupos...</div>
+            <div id="grid-contenedor-grupos" class="grid-grupos"></div>
+        </div>
+
+        <div id="fases-finales" class="vista">
+            <div class="wrapper-tabla" style="overflow-x: auto;">
+                <h2>Cuadro de Eliminatorias Directas</h2>
+                <div id="arbol-contenedor" class="arbol-cruces">
+                    <p style="text-align:center; width:100%; color:var(--text-muted);">Calculando emparejamientos...</p>
+                </div>
+            </div>
+        </div>
+
+<div id="vista-paquetisimos" class="vista">
+    <div class="wrapper-tabla">
+        <h2>🎁 Cuadro "Paquetísimos"</h2>
+        <div id="load-paquetisimos" class="loading">Cargando cuadro de eliminatorias...</div>
+        <div id="arbol-paquetisimos" class="arbol-cruces"></div>
+    </div>
+</div>
+        
+        <div id="partidos-hoy" class="vista">
+            <div class="wrapper-tabla">
+                <h2 id="titulo-hoy">Partidos de la Jornada</h2>
+                <div id="load-hoy" class="loading">Buscando partidos programados...</div>
+                <div id="lista-hoy"></div>
+            </div>
+        </div>
+
+        <div id="calendario-completo" class="vista">
+            <div class="wrapper-tabla">
+                <h2>Todos los Resultados y Calendario del Torneo</h2>
+                <div id="load-calendario" class="loading">Cargando historial de partidos...</div>
+                <div id="lista-calendario-total"></div>
+            </div>
+        </div>
+
+        <div id="pronosticos" class="vista">
+    <div class="wrapper-tabla">
+        <h2>Predicciones de los Participantes</h2>
+        <div id="load-pronosticos" class="loading">Cargando pronósticos de la porra...</div>
+        
+        <div style="margin-bottom: 10px;">
+            <input type="text" id="buscador-pronosticos" onkeyup="filtrarPronosticos()" 
+                   placeholder="🔍 Buscar concursante..." 
+                   style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); color: white;">
+        </div>
+        <div style="overflow-x: auto; max-height: 600px; border-radius: 8px;">
+            <table id="tabla-pronosticos" class="tabla-porra" style="display:none;">
+                        <thead id="header-pronosticos"></thead>
+                        <tbody id="body-pronosticos"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="vista-bonus" class="vista">
+            <div class="wrapper-tabla">
+                <h2>⭐ Predicciones Bonus (Semifinalistas · Final · Campeón)</h2>
+                <div id="load-bonus" class="loading">Cargando predicciones bonus...</div>
+                <div style="margin-bottom: 10px;">
+                    <input type="text" id="buscador-bonus" onkeyup="filtrarBonus()" 
+                           placeholder="🔍 Buscar concursante..." 
+                           style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); color: white;">
+                </div>
+                <div style="overflow-x: auto; max-height: 600px; border-radius: 8px;">
+                    <table id="tabla-bonus" class="tabla-porra" style="display:none;">
+                        <thead id="header-bonus"></thead>
+                        <tbody id="body-bonus"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="resumen-ia" class="vista">
+            <div class="wrapper-tabla">
+                <h2>🎙️ El Micrófono de la IA - Crónica Diaria</h2>
+                <div id="load-resumen" class="loading">Sintonizando los micrófonos de la IA...</div>
+                <div id="texto-resumen-ia" class="resumen-container" style="display:none;"></div>
+            </div>
+        </div>
+        <div id="vista-reglamento" class="vista">
+    <div class="wrapper-tabla">
+        <h2>📜 Reglamento Oficial</h2>
+        <div id="load-reglamento" class="loading">Cargando reglamento...</div>
+        <div id="texto-reglamento" class="resumen-container" style="display:none; white-space: pre-line;"></div>
+    </div>
+</div>
+           <div id="info-noticias" class="vista">
+        <div class="wrapper-tabla">
+            <h2>ℹ️ Reglas y Noticias</h2>
+            <div id="load-info" class="loading">Cargando información...</div>
+            <div id="texto-info" class="resumen-container" style="display:none; white-space: pre-line;"></div>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        const URL_CSV_CLASIFICACION = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=926016432&single=true&output=csv";
+        const URL_CSV_COPA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=1380530497&single=true&output=csv";
+        const URL_CSV_PRONOSTICOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=260902808&single=true&output=csv";
+        const URL_CSV_RESUMEN = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=1115447444&single=true&output=csv";
+        const URL_CSV_REGLAMENTO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=2145481895&single=true&output=csv";
+        const URL_CSV_INFO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=1253131676&single=true&output=csv";
+        const URL_CSV_PAQUETISIMOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=1418538523&single=true&output=csv";
+        const URL_CSV_BONUS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=1997817732&single=true&output=csv";
+        
+        const URL_CSV_RESUL_BAN = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEVr9yo4wPzjxr9D3HINNfMYOLTGwKDrQx5xFgQuiXZV71Hn4emWMR9oH-K-VhB8hWykqQwMac65gJ/pub?gid=9958161&single=true&output=csv";
+
+        let gruposGlobalesMapeados = {};
+        let partidosEliminatoriasMapeados = { "1/16 F": [], "1/8 F": [], "1/4 F": [], "1/2 F": [], "FINAL": [] };
+
+        function parsearCSV(texto) {
+            let lineas = texto.split(/\r?\n/);
+            return lineas.map(linea => {
+                let resultado = [];
+                let dentroComillas = false;
+                let celda_actual = "";
+                for (let i = 0; i < linea.length; i++) {
+                    let char = linea[i];
+                    if (char === '"') { dentroComillas = !dentroComillas; }
+                    else if (char === ',' && !dentroComillas) { resultado.push(celda_actual.trim()); celda_actual = ""; }
+                    else { celda_actual += char; }
+                }
+                resultado.push(celda_actual.trim());
+                return resultado;
+            }).filter(l => l.length > 1 || l[0] !== "");
+        }
+
+        function cambiarVista(idVista) {
+            document.querySelectorAll('.vista').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(idVista).classList.add('active');
+            
+            if(idVista === 'clasificacion') document.getElementById('btn-clasificacion').classList.add('active');
+            if(idVista === 'fase-copa') document.getElementById('btn-copa').classList.add('active');
+            if(idVista === 'fases-finales') document.getElementById('btn-cruces').classList.add('active');
+            if(idVista === 'partidos-hoy') document.getElementById('btn-hoy').classList.add('active');
+            if(idVista === 'calendario-completo') document.getElementById('btn-calendario').classList.add('active');
+            if(idVista === 'pronosticos') document.getElementById('btn-pronosticos').classList.add('active');
+            if(idVista === 'vista-bonus') document.getElementById('btn-bonus').classList.add('active');
+            if(idVista === 'resumen-ia') document.getElementById('btn-resumen').classList.add('active');
+            if(idVista === 'info-noticias') document.getElementById('btn-info').classList.add('active');
+            if(idVista === 'vista-reglamento') document.getElementById('btn-reglamento').classList.add('active');
+            if(idVista === 'vista-paquetisimos') document.getElementById('btn-paquetisimos').classList.add('active');
+        }
+
+        // Control dinámico de zona horaria con límite de jornada a las 08:00 AM
+        function obtenerFechaJornadaActual() {
+            let ahora = new Date();
+            let hora = ahora.getHours();
+            if (hora >= 0 && hora < 8) {
+                ahora.setDate(ahora.getDate() - 1);
+            }
+            let dia = String(ahora.getDate()).padStart(2, '0');
+            let mes = String(ahora.getMonth() + 1).padStart(2, '0');
+            return `${dia}/${mes}`;
+        }
+
+      // Función para cargar Paquetísimos en formato de columnas
+fetch(URL_CSV_PAQUETISIMOS)
+    .then(response => response.text())
+    .then(csvText => {
+        const filas = parsearCSV(csvText);
+        const contenedor = document.getElementById("arbol-paquetisimos");
+        contenedor.innerHTML = "";
+        
+        // ... dentro del fetch ...
+const ordenRondas = ["1/8 F", "1/4 F", "1/2 F", "FINAL"];
+
+ordenRondas.forEach(faseActual => {
+    const col = document.createElement("div");
+    col.className = "ronda-columna";
+    col.innerHTML = `<div class="ronda-titulo-cruces">${faseActual}</div>`;
+    
+    // Cambiamos f[0] por f[1] porque la fase está en la COLUMNA B
+    const partidosFase = filas.filter(f => f[1] && f[1].trim() === faseActual);
+    
+    partidosFase.forEach(fila => {
+        // Columna C = fila[2] (Equipo 1)
+        // Columna D = fila[3] (Equipo 2)
+        // Columna E = fila[4] (Gol 1)
+        // Columna F = fila[5] (Gol 2)
+        const eq1 = fila[2];
+        const eq2 = fila[3];
+        const gol1 = fila[4]; 
+        const gol2 = fila[5];
+
+        const card = document.createElement("div");
+        card.className = "cruce-card";
+        
+        const resultado = (gol1 !== undefined && gol1 !== "" && gol2 !== undefined && gol2 !== "") ? `${gol1} - ${gol2}` : "-";
+
+        card.innerHTML = `
+            <div class="partido-fila">
+                <span class="team">${eq1 || ''}</span>
+                <span class="score">${resultado}</span>
+                <span class="team re">${eq2 || ''}</span>
+            </div>
+        `;
+        col.appendChild(card);
+    });
+    contenedor.appendChild(col);
+});
+// ... resto del código ...
+        document.getElementById("load-paquetisimos").style.display = "none";
+    })
+    .catch(err => {
+        console.error("Error cargando Paquetísimos:", err);
+        document.getElementById("load-paquetisimos").innerText = "Error al cargar los datos.";
+    });
+        
+        function banderitaFiltro(textoBandera) {
+            if(!textoBandera || textoBandera.includes("BUSCARV") || textoBandera.trim() === "") {
+                return "🏳️"; 
+            }
+            return textoBandera;
+        }
+
+        // NUEVA FUNCIÓN AUTOMATIZADA PARA CALENDARIO COMPLETO Y PARTIDOS DE HOY
+        async function cargarPartidosYCalendario() {
+    try {
+        let res = await fetch(URL_CSV_RESUL_BAN);
+        let text = await res.text();
+        let filas = parsearCSV(text);
+        if(filas.length === 0) return;
+
+        let fechaHoy = obtenerFechaJornadaActual();
+        document.getElementById('titulo-hoy').innerText = `📅 Partidos de la Jornada (${fechaHoy})`;
+
+        let htmlHoy = "";
+        let htmlCalendarioTotal = "";
+        let countHoy = 0;
+
+        for(let i = 1; i < filas.length; i++) {
+            let fila = filas[i];
+            // Si solo nos interesan los datos básicos, quitamos la restricción de < 8
+            if(fila.length < 3) continue;
+
+            let fecha = fila[0];      
+            let hora = fila[1];       
+            let equipo1 = fila[2];    
+            let goles1 = fila[4];     
+            let goles2 = fila[5];     
+            let equipo2 = fila[6];    
+
+            let marcador = (goles1 !== "" && goles2 !== "") ? `${goles1} - ${goles2}` : "vs";
+
+            // HTML Calendario Total sin banderas
+            htmlCalendarioTotal += `
+                <div class="match-day-box" style="border-left-color: var(--border);">
+                    <span class="match-time">📅 Fecha: ${fecha} | ⏰ Hora: ${hora} h</span>
+                    <div class="partido-fila-completa">
+                        <div class="bloque-equipo izq">
+                            <span>${equipo1}</span>
+                        </div>
+                        <div class="score-box" style="background:rgba(0,0,0,0.2); color:#fff;">${marcador}</div>
+                        <div class="bloque-equipo der">
+                            <span>${equipo2}</span>
+                        </div>
+                    </div>
+                </div>`;
+
+            // HTML Partidos de hoy sin banderas
+            if(fecha === fechaHoy) {
+                countHoy++;
+                htmlHoy += `
+                    <div class="match-day-box">
+                        <span class="match-time">⏰ Hora del Partido: ${hora} h</span>
+                        <div class="partido-fila-completa">
+                            <div class="bloque-equipo izq">
+                                <span>${equipo1}</span>
+                            </div>
+                            <div class="score-box">${marcador}</div>
+                            <div class="bloque-equipo der">
+                                <span>${equipo2}</span>
+                            </div>
+                        </div>
+                    </div>`;
+            }
+        }
+
+        if(countHoy === 0) {
+            document.getElementById('lista-hoy').innerHTML = `<p style="text-align:center;color:var(--text-muted); padding: 20px;">No hay más partidos programados para hoy (${fechaHoy}).</p>`;
+        } else {
+            document.getElementById('lista-hoy').innerHTML = htmlHoy;
+        }
+        document.getElementById('load-hoy').style.display = 'none';
+
+        document.getElementById('lista-calendario-total').innerHTML = htmlCalendarioTotal;
+        document.getElementById('load-calendario').style.display = 'none';
+
+    } catch(e) {
+        console.error(e);
+        document.getElementById('load-hoy').innerText = "⚠️ Error al procesar partidos.";
+        document.getElementById('load-calendario').innerText = "⚠️ Error al procesar el calendario.";
+    }
+}
+
+                
+
+        async function cargarClasificacion() {
+            try {
+                let res = await fetch(URL_CSV_CLASIFICACION);
+                let text = await res.text();
+                let filas = parsearCSV(text);
+                if(filas.length === 0) return;
+
+                let headerHTML = "<tr>";
+                filas[0].forEach(col => headerHTML += `<th>${col}</th>`);
+                headerHTML += "</tr>";
+                document.getElementById('header-clasificacion').innerHTML = headerHTML;
+
+                let bodyHTML = "";
+                for(let i = 1; i < filas.length; i++) {
+                    bodyHTML += "<tr>";
+                    filas[i].forEach((col, idx) => {
+                        if(idx === 0) bodyHTML += `<td><span class="pos-destacada">${col}</span></td>`;
+                        else bodyHTML += `<td>${col}</td>`;
+                    });
+                    bodyHTML += "</tr>";
+                }
+                document.getElementById('body-clasificacion').innerHTML = bodyHTML;
+                document.getElementById('load-clasificacion').style.display = 'none';
+                document.getElementById('tabla-clasificacion').style.display = 'table';
+            } catch(e) { document.getElementById('load-clasificacion').innerText = "⚠️ Error al conectar con Clasificación."; }
+        }
+
+        async function cargarCopa() {
+            try {
+                let res = await fetch(URL_CSV_COPA);
+                let text = await res.text();
+                let filas = parsearCSV(text);
+                if(filas.length === 0) return;
+
+                let datosGrupos = {};
+                partidosEliminatoriasMapeados = { "1/16 F": [], "1/8 F": [], "1/4 F": [], "1/2 F": [], "FINAL": [] };
+
+                for(let i = 1; i < filas.length; i++) {
+                    let fila = filas[i];
+                    if(!fila || fila.length < 4) continue;
+
+                    let grupo = (fila[1] || "").trim();
+                    let local = fila[2] || "Sin nombre";
+                    let visitante = fila[3] || "Sin nombre";
+                    let gLocal = fila[4];
+                    let gVisitante = fila[5];
+
+                    if(["1/16 F", "1/8 F", "1/4 F", "1/2 F", "FINAL"].includes(grupo)) {
+                        partidosEliminatoriasMapeados[grupo].push({ local, visitante, gLocal, gVisitante });
+                        continue;
+                    }
+
+                    if(grupo === "" || grupo.toLowerCase().includes("tabla")) continue;
+                    if(!datosGrupos[grupo]) { datosGrupos[grupo] = { partidos: [], equipos: {} }; }
+                    if(!datosGrupos[grupo].equipos[local]) datosGrupos[grupo].equipos[local] = { pj:0, dg:0, pts:0 };
+                    if(!datosGrupos[grupo].equipos[visitante]) datosGrupos[grupo].equipos[visitante] = { pj:0, dg:0, pts:0 };
+
+                    if(gLocal !== "" && gLocal !== undefined && gVisitante !== "" && gVisitante !== undefined) {
+                        let gl = parseInt(gLocal); let gv = parseInt(gVisitante);
+                        datosGrupos[grupo].equipos[local].pj += 1;
+                        datosGrupos[grupo].equipos[visitante].pj += 1;
+                        datosGrupos[grupo].equipos[local].dg += (gl - gv);
+                        datosGrupos[grupo].equipos[visitante].dg += (gv - gl);
+
+                        if(gl > gv) datosGrupos[grupo].equipos[local].pts += 3;
+                        else if(gv > gl) datosGrupos[grupo].equipos[visitante].pts += 3;
+                        else { datosGrupos[grupo].equipos[local].pts += 1; datosGrupos[grupo].equipos[visitante].pts += 1; }
+                    }
+                    datosGrupos[grupo].partidos.push({ local, visitante, gLocal, gVisitante });
+                }
+
+                gruposGlobalesMapeados = datosGrupos;
+
+                let contenedor = document.getElementById('grid-contenedor-grupos');
+                contenedor.innerHTML = "";
+
+                Object.keys(datosGrupos).sort().forEach(gName => {
+                    let gData = datosGrupos[gName];
+                    let boxHTML = `<div class="grupo-box"><h3>${gName}</h3>`;
+                    boxHTML += `
+                        <table class="mini-tabla">
+                            <thead>
+                                <tr><th>Equipo</th><th style="text-align:center;">PJ</th><th style="text-align:center;">DG</th><th style="text-align:center;">PTS</th></tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    let equiposOrdenados = Object.keys(gData.equipos).map(name => {
+                        return { name, ...gData.equipos[name] };
+                    }).sort((a,b) => b.pts - a.pts || b.dg - a.dg);
+
+                    equiposOrdenados.forEach((eq, index) => {
+                        boxHTML += `
+                            <tr>
+                                <td><strong>${index + 1}°</strong> ${eq.name}</td>
+                                <td style="text-align:center;">${eq.pj}</td>
+                                <td style="text-align:center;">${eq.dg >= 0 ? '+'+eq.dg : eq.dg}</td>
+                                <td style="text-align:center;" class="txt-pts">${eq.pts}</td>
+                            </tr>
+                        `;
+                    });
+                    boxHTML += `</tbody></table>`;
+
+                    gData.partidos.forEach((p, idx) => {
+                        if(idx === 0) boxHTML += `<div class="jornada-titulo">Jornada 1</div>`;
+                        if(idx === 2) boxHTML += `<div class="jornada-titulo">Jornada 2</div>`;
+                        if(idx === 4) boxHTML += `<div class="jornada-titulo">Jornada 3</div>`;
+
+                        let marcador = "-";
+                        if(p.gLocal !== "" && p.gLocal !== undefined && p.gVisitante !== "" && p.gVisitante !== undefined) {
+                            marcador = `${p.gLocal} - ${p.gVisitante}`;
+                        }
+                        boxHTML += `
+                            <div class="partido-fila">
+                                <span class="team">${p.local}</span>
+                                <span class="score">${marcador}</span>
+                                <span class="team re">${p.visitante}</span>
+                            </div>
+                        `;
+                    });
+                    boxHTML += `</div>`;
+                    contenedor.innerHTML += boxHTML;
+                });
+
+                document.getElementById('load-copa').style.display = 'none';
+                generarCuadroCruces();
+
+            } catch(e) { console.error(e); document.getElementById('load-copa').innerText = "⚠️ Error al conectar con la pestaña Copa."; }
+        }
+
+        function generarCuadroCruces() {
+            let posiciones = {};
+            if(gruposGlobalesMapeados) {
+                Object.keys(gruposGlobalesMapeados).forEach(gName => {
+                    let eqData = gruposGlobalesMapeados[gName].equipos;
+                    let ordenados = Object.keys(eqData).map(name => { return { name, ...eqData[name] }; }).sort((a,b) => b.pts - a.pts || b.dg - a.dg);
+                    posiciones[gName] = ordenados;
+                });
+            }
+
+            let getEqTeorico = (grupo, pos) => {
+                if (posiciones && posiciones[grupo] && posiciones[grupo][pos - 1] && posiciones[grupo][pos - 1].name) {
+                    return posiciones[grupo][pos - 1].name;
+                }
+                return `${pos}° ${grupo}`;
+            };
+
+            let llavesProvisionales = [
+                { tag: "Cruce 1", l: getEqTeorico("Grupo A", 1), v: getEqTeorico("Grupo B", 4) },
+                { tag: "Cruce 2", l: getEqTeorico("Grupo C", 2), v: getEqTeorico("Grupo D", 3) },
+                { tag: "Cruce 3", l: getEqTeorico("Grupo E", 1), v: getEqTeorico("Grupo F", 4) },
+                { tag: "Cruce 4", l: getEqTeorico("Grupo G", 2), v: getEqTeorico("Grupo H", 3) },
+                { tag: "Cruce 5", l: getEqTeorico("Grupo B", 1), v: getEqTeorico("Grupo A", 4) },
+                { tag: "Cruce 6", l: getEqTeorico("Grupo D", 2), v: getEqTeorico("Grupo C", 3) },
+                { tag: "Cruce 7", l: getEqTeorico("Grupo F", 1), v: getEqTeorico("Grupo E", 4) },
+                { tag: "Cruce 8", l: getEqTeorico("Grupo H", 2), v: getEqTeorico("Grupo G", 3) },
+                { tag: "Cruce 9", l: getEqTeorico("Grupo C", 1), v: getEqTeorico("Grupo D", 4) },
+                { tag: "Cruce 10", l: getEqTeorico("Grupo A", 2), v: getEqTeorico("Grupo B", 3) },
+                { tag: "Cruce 11", l: getEqTeorico("Grupo G", 1), v: getEqTeorico("Grupo H", 4) },
+                { tag: "Cruce 12", l: getEqTeorico("Grupo E", 2), v: getEqTeorico("Grupo F", 3) },
+                { tag: "Cruce 13", l: getEqTeorico("Grupo D", 1), v: getEqTeorico("Grupo C", 4) },
+                { tag: "Cruce 14", l: getEqTeorico("Grupo B", 2), v: getEqTeorico("Grupo A", 3) },
+                { tag: "Cruce 15", l: getEqTeorico("Grupo F", 2), v: getEqTeorico("Grupo E", 3) },
+                { tag: "Cruce 16", l: getEqTeorico("Grupo H", 1), v: getEqTeorico("Grupo G", 4) }
+            ];
+
+            let html = "";
+
+            // 1. COLUMNA 1/16 DE FINAL
+            html += `<div class="ronda-columna"><div class="ronda-titulo-cruces">1/16 Final</div>`;
+            for(let i = 0; i < 16; i++) {
+                let pExcel = (partidosEliminatoriasMapeados["1/16 F"] && partidosEliminatoriasMapeados["1/16 F"][i]) ? partidosEliminatoriasMapeados["1/16 F"][i] : null;
+                let local = pExcel ? pExcel.local : llavesProvisionales[i].l;
+                let visitante = pExcel ? pExcel.visitante : llavesProvisionales[i].v;
+                let marcador = (pExcel && pExcel.gLocal !== "" && pExcel.gLocal !== undefined) ? `${pExcel.gLocal} - ${pExcel.gVisitante}` : "-";
+                html += `
+                    <div class="cruce-card">
+                        <span class="cruce-info-tag">Cruce ${i+1}</span>
+                        <div class="partido-fila"><span class="team">${local}</span><span class="score">${marcador}</span><span class="team re">${visitante}</span></div>
+                    </div>`;
+            }
+            html += `</div>`;
+
+            // 2. COLUMNA OCTAVOS
+            html += `<div class="ronda-columna"><div class="ronda-titulo-cruces">Octavos de Final</div>`;
+            for(let i = 0; i < 8; i++) {
+                let pExcel = (partidosEliminatoriasMapeados["1/8 F"] && partidosEliminatoriasMapeados["1/8 F"][i]) ? partidosEliminatoriasMapeados["1/8 F"][i] : null;
+                let local = pExcel ? pExcel.local : "Por definir";
+                let visitante = pExcel ? pExcel.visitante : "Por definir";
+                let marcador = (pExcel && pExcel.gLocal !== "" && pExcel.gLocal !== undefined) ? `${pExcel.gLocal} - ${pExcel.gVisitante}` : "-";
+                html += `
+                    <div class="cruce-card" style="margin: 40px 0;">
+                        <span class="cruce-info-tag">Octavos O${i+1}</span>
+                        <div class="partido-fila">
+                            <span class="team" style="${local === 'Por definir' ? 'color:var(--text-muted);' : ''}">${local}</span>
+                            <span class="score">${marcador}</span>
+                            <span class="team re" style="${visitante === 'Por definir' ? 'color:var(--text-muted);' : ''}">${visitante}</span>
+                        </div>
+                    </div>`;
+            }
+            html += `</div>`;
+
+            // 3. COLUMNA CUARTOS
+            html += `<div class="ronda-columna"><div class="ronda-titulo-cruces">Cuartos de Final</div>`;
+            for(let i = 0; i < 4; i++) {
+                let pExcel = (partidosEliminatoriasMapeados["1/4 F"] && partidosEliminatoriasMapeados["1/4 F"][i]) ? partidosEliminatoriasMapeados["1/4 F"][i] : null;
+                let local = pExcel ? pExcel.local : "Por definir";
+                let visitante = pExcel ? pExcel.visitante : "Por definir";
+                let marcador = (pExcel && pExcel.gLocal !== "" && pExcel.gLocal !== undefined) ? `${pExcel.gLocal} - ${pExcel.gVisitante}` : "-";
+                html += `
+                    <div class="cruce-card" style="margin: 110px 0;">
+                        <span class="cruce-info-tag">Cuartos M${i+1}</span>
+                        <div class="partido-fila">
+                            <span class="team" style="${local === 'Por definir' ? 'color:var(--text-muted);' : ''}">${local}</span>
+                            <span class="score">${marcador}</span>
+                            <span class="team re" style="${visitante === 'Por definir' ? 'color:var(--text-muted);' : ''}">${visitante}</span>
+                        </div>
+                    </div>`;
+            }
+            html += `</div>`;
+
+            // 4. COLUMNA SEMIFINALES
+            html += `<div class="ronda-columna"><div class="ronda-titulo-cruces">Semifinales</div>`;
+            for(let i = 0; i < 2; i++) {
+                let pExcel = (partidosEliminatoriasMapeados["1/2 F"] && partidosEliminatoriasMapeados["1/2 F"][i]) ? partidosEliminatoriasMapeados["1/2 F"][i] : null;
+                let local = pExcel ? pExcel.local : "Por definir";
+                let visitante = pExcel ? pExcel.visitante : "Por definir";
+                let marcador = (pExcel && pExcel.gLocal !== "" && pExcel.gLocal !== undefined) ? `${pExcel.gLocal} - ${pExcel.gVisitante}` : "-";
+                html += `
+                    <div class="cruce-card" style="margin: 250px 0;">
+                        <span class="cruce-info-tag">Semifinal S${i+1}</span>
+                        <div class="partido-fila">
+                            <span class="team" style="${local === 'Por definir' ? 'color:var(--text-muted);' : ''}">${local}</span>
+                            <span class="score">${marcador}</span>
+                            <span class="team re" style="${visitante === 'Por definir' ? 'color:var(--text-muted);' : ''}">${visitante}</span>
+                        </div>
+                    </div>`;
+            }
+            html += `</div>`;
+
+            // 5. COLUMNA GRAN FINAL
+            let pFinal = (partidosEliminatoriasMapeados["FINAL"] && partidosEliminatoriasMapeados["FINAL"][0]) ? partidosEliminatoriasMapeados["FINAL"][0] : null;
+            let locF = pFinal ? pFinal.local : "Por definir finalistas";
+            let visF = pFinal ? pFinal.visitante : "";
+            let marF = (pFinal && pFinal.gLocal !== "" && pFinal.gLocal !== undefined) ? `${pFinal.gLocal} - ${pFinal.gVisitante}` : "-";
+
+            html += `
+                <div class="ronda-columna">
+                    <div class="ronda-titulo-cruces" style="border-color:var(--accent); background:rgba(250,204,21,0.1);">🏆 Gran Final</div>
+                    <div class="cruce-card" style="border: 2px solid var(--accent); background: rgba(0,0,0,0.5);">
+                        <span class="cruce-info-tag" style="color:var(--accent); text-align:center;">Partido por el Título</span>
+                        <div class="partido-fila" style="padding: 10px 0;">
+                            ${!visF ? 
+                            `<span class="team" style="color:var(--accent); font-weight:bold; text-align:center; width:100%;">${locF}</span>` :
+                            `<span class="team" style="color:var(--accent); font-weight:bold;">${locF}</span><span class="score">${marF}</span><span class="team re" style="color:var(--accent); font-weight:bold;">${visF}</span>`}
+                        </div>
+                    </div>
+                </div>`;
+
+            document.getElementById('arbol-contenedor').innerHTML = html;
+        }
+
+function filtrarPronosticos() {
+            let input = document.getElementById("buscador-pronosticos");
+            let filtro = input.value.toUpperCase();
+            let tabla = document.getElementById("tabla-pronosticos");
+            let filas = tabla.getElementsByTagName("tr");
+
+            // Empezamos desde 1 para saltarnos la fila del encabezado (th)
+            for (let i = 1; i < filas.length; i++) {
+                let celdaJugador = filas[i].getElementsByTagName("td")[0]; 
+                if (celdaJugador) {
+                    let texto = celdaJugador.textContent || celdaJugador.innerText;
+                    if (texto.toUpperCase().indexOf(filtro) > -1) {
+                        filas[i].style.display = "";
+                    } else {
+                        filas[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
+        function filtrarBonus() {
+            let input = document.getElementById("buscador-bonus");
+            let filtro = input.value.toUpperCase();
+            let tabla = document.getElementById("tabla-bonus");
+            let filas = tabla.getElementsByTagName("tr");
+
+            for (let i = 1; i < filas.length; i++) {
+                let celdaJugador = filas[i].getElementsByTagName("td")[0];
+                if (celdaJugador) {
+                    let texto = celdaJugador.textContent || celdaJugador.innerText;
+                    if (texto.toUpperCase().indexOf(filtro) > -1) {
+                        filas[i].style.display = "";
+                    } else {
+                        filas[i].style.display = "none";
+                    }
+                }
+            }
+        }
+        
+        async function cargarPronosticos() {
+            try {
+                let res = await fetch(URL_CSV_PRONOSTICOS);
+                let text = await res.text();
+                let filas = parsearCSV(text);
+                if(filas.length === 0) return;
+
+                let headerHTML = "<tr>";
+                filas[0].forEach((col, idx) => {
+                    if(idx === 0) headerHTML += `<th class="jugador-header">${col}</th>`;
+                    else headerHTML += `<th>${col}</th>`;
+                });
+                headerHTML += "</tr>";
+                document.getElementById('header-pronosticos').innerHTML = headerHTML;
+
+                let bodyHTML = "";
+                for(let i = 1; i < filas.length; i++) {
+                    bodyHTML += "<tr>";
+                    filas[i].forEach((col, idx) => {
+                        if(idx === 0) bodyHTML += `<td class="jugador-celda">${col}</td>`;
+                        else if(idx === filas[i].length - 1 || filas[0][idx].toLowerCase() === 'total') bodyHTML += `<td class="celda-total">${col}</td>`;
+                        else { let val = col.trim(); bodyHTML += `<td class="celda-pronostico">${val === "" ? "-" : val}</td>`; }
+                    });
+                    bodyHTML += "</tr>";
+                }
+                document.getElementById('body-pronosticos').innerHTML = bodyHTML;
+                document.getElementById('load-pronosticos').style.display = 'none';
+                document.getElementById('tabla-pronosticos').style.display = 'table';
+            } catch(e) { console.error(e); document.getElementById('load-pronosticos').innerText = "⚠️ Error al conectar con Pronósticos."; }
+        }
+
+        // NUEVA FUNCIÓN PARA CARGAR LA PESTAÑA BONUS (Semifinalistas / Final / Campeón)
+        async function cargarBonus() {
+            try {
+                let res = await fetch(URL_CSV_BONUS);
+                let text = await res.text();
+                let filas = parsearCSV(text);
+                if(filas.length < 2) return;
+
+                // La fila 0 son los títulos combinados (SEMIFINALISTAS 2 PTOS / FINAL 3 PTOS / CAMPEON 4 PTOS)
+                // Construimos nuestra propia cabecera de columnas individuales
+                document.getElementById('header-bonus').innerHTML = `
+                    <tr>
+                        <th class="jugador-header">Jugador</th>
+                        <th>Semi 1</th><th>Semi 2</th><th>Semi 3</th><th>Semi 4</th>
+                        <th>Finalista 1</th><th>Finalista 2</th>
+                        <th>Campeón</th>
+                    </tr>`;
+
+                let bodyHTML = "";
+                for(let i = 1; i < filas.length; i++) {
+                    let fila = filas[i];
+                    if(!fila[0] || fila[0].trim() === "") continue;
+
+                    let jugador = fila[0];
+                    // B,C,D,E = Semifinalistas (idx 1-4)
+                    let semi1 = fila[1] || "-", semi2 = fila[2] || "-", semi3 = fila[3] || "-", semi4 = fila[4] || "-";
+                    // F (idx 5) es columna vacía separadora -> se salta
+                    // G,H = Finalistas (idx 6-7)
+                    let final1 = fila[6] || "-", final2 = fila[7] || "-";
+                    // I (idx 8) es columna vacía separadora -> se salta
+                    // J = Campeón (idx 9)
+                    let campeon = fila[9] || "-";
+
+                    bodyHTML += `
+                        <tr>
+                            <td class="jugador-celda">${jugador}</td>
+                            <td class="celda-pronostico">${semi1}</td>
+                            <td class="celda-pronostico">${semi2}</td>
+                            <td class="celda-pronostico">${semi3}</td>
+                            <td class="celda-pronostico">${semi4}</td>
+                            <td class="celda-pronostico" style="background: rgba(20,184,166,0.18);">${final1}</td>
+                            <td class="celda-pronostico" style="background: rgba(20,184,166,0.18);">${final2}</td>
+                            <td class="celda-total">${campeon}</td>
+                        </tr>`;
+                }
+                document.getElementById('body-bonus').innerHTML = bodyHTML;
+                document.getElementById('load-bonus').style.display = 'none';
+                document.getElementById('tabla-bonus').style.display = 'table';
+            } catch(e) {
+                console.error(e);
+                document.getElementById('load-bonus').innerText = "⚠️ Error al conectar con Bonus.";
+            }
+        }
+
+        // NUEVA FUNCIÓN PARA CARGAR EL RESUMEN GENERADO POR LA IA (VERSIÓN DEFINITIVA)
+        async function cargarResumenDiario() {
+            try {
+                // Añadimos un parámetro de tiempo al final de la URL para romper la caché del navegador
+                let urlConCacheBuster = URL_CSV_RESUMEN + (URL_CSV_RESUMEN.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
+                
+                let res = await fetch(urlConCacheBuster);
+                if (!res.ok) throw new Error("Error en la respuesta del servidor: " + res.status);
+                
+                let text = await res.text();
+                let textoLimpio = text.trim();
+                
+                // Si la celda viene vacía o da error de Google
+                if (!textoLimpio || textoLimpio.includes("<!DOCTYPE html>")) {
+                    throw new Error("El enlace no devuelve un CSV válido. Revisa que esté publicado en la web.");
+                }
+                
+                // Limpiar comillas si Google Sheets las añade al envolver la celda completa
+                if (textoLimpio.startsWith('"') && textoLimpio.endsWith('"')) {
+                    textoLimpio = textoLimpio.substring(1, textoLimpio.length - 1);
+                }
+                
+                // Corregir comillas dobles internas de Sheets
+                textoLimpio = textoLimpio.replace(/""/g, '"');
+                
+                // Formatear saltos de línea y soporte para formato negrita (Markdown **)
+                let textoFormateado = textoLimpio
+                    .replace(/\\n/g, '<br>')
+                    .replace(/\n/g, '<br>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+                document.getElementById('texto-resumen-ia').innerHTML = textoFormateado;
+                document.getElementById('load-resumen').style.display = 'none';
+                document.getElementById('texto-resumen-ia').style.display = 'block';
+            } catch(e) { 
+                console.error("Error capturado:", e); 
+                // Te pintamos el error exacto en pantalla para que sepamos qué lo detiene
+                document.getElementById('load-resumen').innerHTML = `⚠️ Error: <span style="color:#ff4d4d; font-weight:bold;">${e.message}</span>`; 
+            }
+        }
+
+  //NUEVA FUNCION INFO
+        async function cargarInfo() {
+    try {
+        let res = await fetch(URL_CSV_INFO);
+        let text = await res.text();
+        let filas = parsearCSV(text);
+        
+        // Unimos todas las celdas en un solo bloque de texto
+        let contenido = filas.map(fila => fila.join(" ")).join("\n\n");
+        
+        document.getElementById('texto-info').innerHTML = contenido;
+        document.getElementById('texto-info').style.display = 'block';
+        document.getElementById('load-info').style.display = 'none';
+    } catch(e) {
+        document.getElementById('load-info').innerText = "⚠️ Error al cargar la info.";
+    }
+}   
+        
+       window.onload = function() {
+    // Protección individual para cada función
+    const funciones = [
+    { nombre: "Resumen", fn: cargarResumenDiario },
+    { nombre: "Clasificación", fn: cargarClasificacion },
+    { nombre: "Copa", fn: cargarCopa },
+    { nombre: "Pronósticos", fn: cargarPronosticos },
+    { nombre: "Bonus", fn: cargarBonus },
+    { nombre: "Partidos", fn: cargarPartidosYCalendario },
+    { nombre: "Info", fn: cargarInfo } // <--- Nueva función aquí
+];
+
+    funciones.forEach(item => {
+        try {
+            if (typeof item.fn === "function") {
+                item.fn();
+            }
+        } catch (e) {
+            console.error(`Error crítico en ${item.nombre}:`, e);
+        }
+    });
+};
+        fetch(URL_CSV_REGLAMENTO)
+    .then(response => response.text())
+    .then(csvText => {
+        const datos = parsearCSV(csvText);
+        const contenedor = document.getElementById("texto-reglamento");
+        
+        // Convertimos el texto:
+        // 1. Unimos las filas con saltos de línea <br>
+        // 2. Usamos replace para detectar texto entre asteriscos **texto** y ponerlo en <b>
+        let htmlFinal = datos.map(fila => fila.join(" ")).join("<br><br>");
+        htmlFinal = htmlFinal.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        
+        contenedor.innerHTML = htmlFinal; // Usamos innerHTML para que lea el formato
+        contenedor.style.display = "block";
+        document.getElementById("load-reglamento").style.display = "none";
+    })
+    .catch(err => console.error("Error cargando el reglamento:", err));
+        
+    </script>
+    <div class="vista" style="margin-top: 30px; display: block !important;">
+    <div class="wrapper-tabla" style="text-align: center; padding: 20px;">
+        <!-- Logo 1 -->
+        <img src="logo.jpg" alt="Patrocinador 1" style="width: 100%; max-width: 300px; display: block; margin: 0 auto 15px auto; border-radius: 8px;">
+        
+       <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+            <img src="logo2.jpeg" alt="Patrocinador 2" style="width: 100%; max-width: 140px; border-radius: 8px;">
+            <img src="logo3.jpeg" alt="Patrocinador 3" style="width: 100%; max-width: 140px; border-radius: 8px;">
+        </div>
+    </div>
+</div>
+    
+</body>
+</html>
